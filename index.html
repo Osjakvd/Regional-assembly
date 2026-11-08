@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Organización de Asamblea Regional</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#8a5a14">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{--bg:#fff;--fg:#1d1d1f;--mu:#666;--bd:#cfcfcf;--ac:#8a5a14;--cd:#faf6ee;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1b1d;--fg:#eee;--mu:#aaa;--bd:#444;--ac:#e0b060;--cd:#26241f}}
+:root[data-theme="dark"]{--bg:#1b1b1d;--fg:#eee;--mu:#aaa;--bd:#444;--ac:#e0b060;--cd:#26241f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.4 system-ui,Segoe UI,Arial,sans-serif}
+nav{display:flex;gap:4px;flex-wrap:wrap;padding:8px 12px;border-bottom:1px solid var(--bd)}
+button,select,input{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--bd);border-radius:6px;padding:6px 10px}
+button{cursor:pointer}button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+main{padding:12px;max-width:1200px;margin:auto}
+h2{margin:.2em 0}.mu{color:var(--mu);font-size:13px}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.f label{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--mu)}.f input{width:100%}
+.w{overflow-x:auto}table{border-collapse:collapse;width:100%}td,th{border:1px solid var(--bd);padding:4px 8px;text-align:left;vertical-align:top}
+.cd{border:1px solid var(--bd);background:var(--cd);border-radius:8px;padding:10px;margin:8px 0}
+.cd select{width:100%;margin:3px 0}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:start}
+.bx{border:2px solid var(--ac);border-radius:4px;padding:6px 8px;margin:8px 0;font-size:13px;background:var(--bg)}
+.bx b{display:block}.t{text-align:center}.r{margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.wn{color:#b00020}
+@media(max-width:700px){.g3{grid-template-columns:1fr}}
+@media print{nav,.np{display:none}}
+</style></head><body>
+<nav id="nv"></nav><main id="v"></main>
+<script src="lib/pdf-lib.min.js"></script>
+<script src="lib/jszip.min.js"></script>
+<script src="lib/pdf.min.js"></script>
+<script src="lib/exceljs.min.js"></script>
+<script>
+const D=(id,n,o={})=>({id,n,...o});
+const AREAS=[
+{id:'AC',h:'Coordinador del Comité de Asamblea',deps:[D('acom','Acomodadores'),D('cont','Contabilidad'),D('est','Estacionamiento'),D('pa','Primeros Auxilios'),D('seg','Seguridad',{co:1})]},
+{id:'AP',h:'Superintendente del programa',deps:[D('av','Audio y Video',{av:1}),D('bau','Bautismo'),D('it','Interpretación táctil (solo lengua de señas)',{opt:1})]},
+{id:'AA',h:'Superintendente de Alojamiento',deps:[D('alo','Alojamiento'),D('isv','Información y Servicio Voluntario'),D('ins','Instalación',{opt:1}),D('lim','Limpieza'),D('ogg','Objetos Perdidos y Guardarropa'),D('tm','Transporte y Materiales',{opt:1}),D('agua','Agua potable')]}];
+const DEF={asm:{nombre:'Felices para siempre',tit2:'PACHUCA HGO. #01 | 22/05/26 - 24/05/26',recinto:'Auditorio Gota de Plata de Pachuca de Soto, Hgo.',ciudad:'Pachuca Hidalgo',fechas:'22-24 de mayo 2026',fcarta:'26-01-2026'},people:[],as:{},pres:{}};
+let S=JSON.parse(JSON.stringify(DEF)),T='asm',AR='AC',TPL=null,DL=null;
+try{const j=localStorage.getItem('asamblea-v1');if(j)S=Object.assign(S,JSON.parse(j))}catch(e){}
+const save=()=>{try{localStorage.setItem('asamblea-v1',JSON.stringify(S))}catch(e){}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const P=id=>S.people.find(p=>p.id==id),uid=()=>Math.random().toString(36).slice(2,9);
+const pres=d=>S.pres[d.id]!==undefined?S.pres[d.id]:!d.opt;
+const slots=d=>[d.co?'Coordinador':'Superintendente',...(d.av?['Auxiliar Audio','Auxiliar Video','Auxiliar Plataforma']:['Auxiliar','Auxiliar','Auxiliar'])];
+const used=()=>new Set(Object.entries(S.as).filter(([k])=>{const i=k.split(':')[0];const d=AREAS.flatMap(a=>a.deps).find(x=>x.id==i);return !d||pres(d)}).map(e=>e[1]));
+const nm=k=>{const p=P(S.as[k]);return p?esc(p.nombre):'<span class="mu">—</span>'};
+(window.claude?window.claude.use('downloads'):Promise.resolve(null)).then(d=>{DL=d;if(T=='cartas'||T=='asm')render()}).catch(()=>{});
+const idb=(m,v)=>new Promise(r=>{try{const q=indexedDB.open('asm',1);q.onupgradeneeded=()=>q.result.createObjectStore('k');q.onsuccess=()=>{const s=q.result.transaction('k',m=='get'?'readonly':'readwrite').objectStore('k');const x=m=='get'?s.get('tpl'):s.put(v,'tpl');x.onsuccess=()=>r(x.result);x.onerror=()=>r()};q.onerror=()=>r()}catch(e){r()}});
+idb('get').then(b=>{TPL=b;if(T=='cartas')render()});
+async function sv(name,data){if(!DL){const a=document.createElement('a');a.href=URL.createObjectURL(data instanceof Blob?data:new Blob([data]));a.download=name;a.click();return}try{await DL.save({filename:name,data})}catch(e){if(e.code!='declined')alert('No se pudo guardar: '+(e.message||e.code))}}
+const TABS=[['asm','Asamblea'],['dir','Directorio'],['asg','Asignación'],['org','Organigrama'],['dds','Directorios'],['dpt','Dir. de departamentos'],['cartas','Cartas']];
+const go=t=>{T=t;render()};
+function render(){document.getElementById('nv').innerHTML=TABS.map(([k,n])=>`<button class="${k==T?'on':''}" onclick="go('${k}')">${n}</button>`).join('');
+document.getElementById('v').innerHTML=({asm:vAsm,dir:vDir,asg:vAsg,org:vOrg,dds:vDds,dpt:vDpt,cartas:vCartas})[T]();if(T=='dir')tb()}
+function hdr(){const a=S.asm;return `<div class="t"><h2>${esc(a.nombre)}</h2><div>${esc(a.tit2)}</div><div class="mu">${esc(a.recinto)}</div></div>`}
+/* Asamblea */
+function vAsm(){const L={nombre:'Nombre de la asamblea',tit2:'Encabezado (línea 2)',recinto:'Lugar / recinto (línea 3)',ciudad:'Sede (texto de la carta)',fechas:'Fechas (texto de la carta)',fcarta:'Fecha de la carta'};
+return `<h2>Datos de la asamblea</h2><p class="mu">Se usan como encabezado en organigrama, directorios y cartas.</p><div class="f">${Object.keys(L).map(k=>`<label>${L[k]}<input value="${esc(S.asm[k])}" oninput="S.asm.${k}=this.value;save()"></label>`).join('')}</div>
+<h2 style="margin-top:20px">Respaldo</h2><p class="mu">Exporta todo a un archivo JSON para pasarlo a otro equipo o conservarlo.</p><div class="r"><button onclick="sv('asamblea-respaldo.json',JSON.stringify(S,null,1))">Exportar respaldo</button><label>Importar respaldo: <input type="file" accept=".json" onchange="impJ(this)"></label></div>`}
+async function impJ(i){try{const o=JSON.parse(await i.files[0].text());if(!o.asm||!o.people)throw 0;S=Object.assign(JSON.parse(JSON.stringify(DEF)),o);save();render()}catch(e){alert('Archivo de respaldo no válido.')}}
+/* Directorio */
+function vDir(){return `<h2>Directorio general (${S.people.length})</h2>
+<div class="cd"><div class="f"><label>Nombre<input id="n1"></label><label>Congregación<input id="n2"></label><label>Teléfono<input id="n3"></label><label>Correo<input id="n4"></label></div><div class="r"><button onclick="addP()">Agregar</button><label>Importar CSV o PDF: <input type="file" accept=".csv,.txt,.pdf" onchange="impC(this)"></label></div></div>
+<div id="rv"></div><input id="q" placeholder="Buscar por nombre, apellido o correo…" oninput="tb()" style="width:100%;margin-bottom:8px"><div class="w"><table><thead><tr><th>Nombre</th><th>Congregación</th><th>Teléfono</th><th>Correo</th><th>Asignación</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>`}
+function where(id){const k=Object.keys(S.as).find(k=>S.as[k]==id);if(!k)return'Libre';if(k=='PR')return'Presidente de la asamblea';const a=AREAS.find(a=>k.startsWith(a.id+':'));if(a)return a.h;const d=AREAS.flatMap(a=>a.deps).find(d=>d.id==k.split(':')[0]);return d?d.n:'—'}
+function tb(){const q=nz(document.getElementById('q')?.value||'').split(/\s+/).filter(Boolean);document.getElementById('tb').innerHTML=S.people.filter(p=>q.every(w=>nz(p.nombre+' '+p.cong+' '+p.correo).includes(w))).sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>`<tr><td>${esc(p.nombre)}</td><td>${esc(p.cong)}</td><td>${esc(p.tel)}</td><td>${esc(p.correo)}</td><td>${esc(where(p.id))}</td><td><button onclick="delP('${p.id}')">Quitar</button></td></tr>`).join('')}
+function addP(){const g=i=>document.getElementById(i).value.trim();if(!g('n1'))return;S.people.push({id:uid(),nombre:g('n1'),cong:g('n2'),tel:g('n3'),correo:g('n4')});save();render()}
+function delP(id){if(!confirm('¿Quitar del directorio y de sus asignaciones?'))return;S.people=S.people.filter(p=>p.id!=id);for(const k in S.as)if(S.as[k]==id)delete S.as[k];save();render()}
+function csv(t){t=t.replace(/^\uFEFF/,'');const l1=t.split(/\r?\n/,1)[0],d=l1.split(';').length>l1.split(',').length?';':',';const R=[];let o=[],c='',q=0;const fl=()=>{o.push(c);c='';if(o.some(x=>x.trim()))R.push(o.map(x=>x.trim()));o=[]};for(let i=0;i<t.length;i++){const h=t[i];if(q){if(h=='"'){if(t[i+1]=='"'){c+='"';i++}else q=0}else c+=h}else if(h=='"')q=1;else if(h==d){o.push(c);c=''}else if(h=='\n'||h=='\r'){if(h=='\r'&&t[i+1]=='\n')i++;fl()}else c+=h}fl();return R}
+async function impC(i){const F=i.files[0];if(/\.pdf$/i.test(F.name))return impP(F);const r=csv(await F.text());if(!r.length)return;const h=r[0].map(x=>x.toLowerCase()),f=s=>h.findIndex(x=>s.test(x));const N=[f(/^nombre$/),f(/^segundo nombre/),f(/^apellidos/)].filter(x=>x>=0);let C,T1,T2,E,rows=r.slice(1);if(N.length){C=f(/^congregaci/);T1=f(/celular/);T2=f(/^tel[eé]fono$/);E=f(/correo|mail/)}else{rows=r;N.push(0);C=1;T1=2;T2=-1;E=3}const g=(c,k)=>k>=0?(c[k]||''):'';
+const seen=new Set(S.people.map(p=>(p.correo||p.nombre).toLowerCase()));let n=0;rows.forEach(c=>{const p={id:uid(),nombre:N.map(k=>g(c,k)).filter(Boolean).join(' '),cong:g(c,C),tel:g(c,T1)||g(c,T2),correo:g(c,E)};const k=(p.correo||p.nombre).toLowerCase();if(!p.nombre||seen.has(k))return;seen.add(k);S.people.push(p);n++});save();alert(n+' personas importadas ('+(rows.length-n)+' omitidas por vacías o duplicadas).');render()}
+/* Asignación */
+function selOld(k){const u=used(),cur=S.as[k];return `<select onchange="setA('${k}',this.value)"><option value="">— sin asignar —</option>${S.people.filter(p=>p.id==cur||!u.has(p.id)).sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>`<option value="${p.id}"${p.id==cur?' selected':''}>${esc(p.nombre)}${p.cong?' · '+esc(p.cong):''}</option>`).join('')}</select>`}
+function setA(k,v){if(v)S.as[k]=v;else delete S.as[k];save();render()}
+function vAsg(){const a=AREAS.find(x=>x.id==AR);
+return `<div class="r np">${AREAS.map(x=>`<button class="${x.id==AR?'on':''}" onclick="AR='${x.id}';render()">${x.h}</button>`).join('')}</div>
+<p class="mu">Cada persona solo puede tener una asignación; el selector muestra únicamente a quienes están libres.</p><div class="cd"><b>Presidente de la Asamblea Regional (opcional)</b>${sel('PR')}</div>
+<div class="cd"><b>${a.h}</b>${sel(a.id+':h')}<b>Auxiliar</b>${sel(a.id+':x')}</div>
+${a.deps.map(d=>`<div class="cd"><label><input type="checkbox" ${pres(d)?'checked':''} onchange="S.pres['${d.id}']=this.checked;save();render()"> <b>${d.n}</b></label>${pres(d)?slots(d).map((l,i)=>`<div class="mu">${l}${i==3&&!d.av?' (opcional)':''}</div>${sel(d.id+':'+i)}`).join(''):'<div class="mu">No presente en esta asamblea</div>'}</div>`).join('')}`}
+/* Organigrama */
+function lines(d){return slots(d).map((l,i)=>{if(!S.as[d.id+':'+i])return'';const t=i==0?(d.co?'Coord.':'Sup.'):(d.av?l.replace('Auxiliar','Aux.')+':':'Aux.');return `<div>${t} ${nm(d.id+':'+i)}</div>`}).join('')}
+function vOrg(){return `<div class="np r"><button onclick="window.print()">Imprimir / PDF</button></div>${hdr()}<div class="g3">${AREAS.map(a=>`<div><div class="bx t"><b>${a.h}</b>${nm(a.id+':h')}</div><div class="bx t"><b>Auxiliar</b>${nm(a.id+':x')}</div>${a.deps.filter(pres).map(d=>`<div class="bx"><b>${d.n}</b>${lines(d)}</div>`).join('')}</div>`).join('')}</div>`}
+/* Directorios */
+function row(l,k){const p=P(S.as[k]);return p?`<tr><td>${l}</td><td>${esc(p.nombre)}</td><td>${esc(p.cong)}</td><td>${esc(p.tel)}</td><td>${esc(p.correo)}</td></tr>`:''}
+function vDds(){return `<div class="np r"><button onclick="window.print()">Imprimir / PDF</button></div>${hdr()}${AREAS.map(a=>`<h2>${a.h}</h2><div class="w"><table><thead><tr><th>Puesto</th><th>Nombre</th><th>Congregación</th><th>Teléfono</th><th>Correo</th></tr></thead><tbody>${row(a.h,a.id+':h')}${row('Auxiliar',a.id+':x')}${a.deps.filter(pres).map(d=>`<tr><th colspan="5">${d.n}</th></tr>`+slots(d).map((l,i)=>row(l,d.id+':'+i)).join('')).join('')}</tbody></table></div>`).join('')}`}
+/* Cartas */
+function recips(){const o=[];AREAS.forEach(a=>{const sup=P(S.as[a.id+':h']);a.deps.filter(pres).forEach(d=>slots(d).forEach((l,i)=>{const p=P(S.as[d.id+':'+i]);if(!p)return;o.push({p,a,d,i,sup,directo:i?P(S.as[d.id+':0']):null,puesto:i==0?`${l} de ${d.n}`:(d.av?l:`Auxiliar de ${d.n}`)})}))});return o}
+function vCartas(){const R=recips();return `<h2>Cartas de invitación (${R.length})</h2>
+<div class="cd"><b>Plantilla PDF</b> <span class="mu">${TPL?'cargada y guardada en este navegador':'aún no cargada'}</span><div class="r"><input type="file" accept=".pdf" onchange="ldT(this)"></div><p class="mu">Usa tu PDF rellenable. Los 10 campos se llenan por posición (de arriba abajo), así que funciona aunque los nombres de campo no coincidan. El encabezado se redibuja con los datos de la asamblea.</p></div>
+<div class="r np"><button onclick="zipAll()" ${TPL&&R.length?'':'disabled'}>Descargar todas (ZIP)</button></div>
+<div class="w"><table><thead><tr><th>Nombre</th><th>Puesto</th><th>Supervisa (correo)</th><th></th></tr></thead><tbody>${R.map((r,j)=>`<tr><td>${esc(r.p.nombre)}</td><td>${esc(r.puesto)}</td><td>${r.sup?esc(r.sup.nombre)+' ('+(esc(r.sup.correo)||'<span class="wn">sin correo</span>')+')':'<span class="wn">falta superintendente de área</span>'}</td><td><button ${TPL?'':'disabled'} onclick="one(${j})">Descargar</button></td></tr>`).join('')}</tbody></table></div>`}
+const nz=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function opts(k,q){const u=used(),cur=S.as[k],t=nz(q).split(/\s+/).filter(Boolean);return '<option value="">— sin asignar —</option>'+S.people.filter(p=>p.id==cur||(!u.has(p.id)&&t.every(w=>nz(p.nombre+' '+p.cong).includes(w)))).sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>`<option value="${p.id}"${p.id==cur?' selected':''}>${esc(p.nombre)}${p.cong?' · '+esc(p.cong):''}</option>`).join('')}
+function sel(k){return `<input placeholder="Buscar por nombre, apellido o congregación…" style="width:100%" oninput="const s=this.nextElementSibling;s.innerHTML=opts('${k}',this.value);s.size=this.value?Math.min(6,s.options.length):0"><select onchange="setA('${k}',this.value)">${opts(k,'')}</select>`}
+/* Directorio de departamentos (plantilla) */
+const PI=k=>{const p=P(S.as[k]);return p?{n:p.nombre,t:p.tel||'',c:p.cong||''}:null};
+function G(){const A=S.asm,ar=[['Coordinador del Comité','Auxiliar del coordinador del Comité'],['Superintendente del programa','Auxiliar del superintendente del programa'],['Superintendente de Alojamiento','Auxiliar del superintendente de Alojamiento']];
+return {t:'DIRECTORIO DE DEPARTAMENTOS DE LA ASAMBLEA REGIONAL',l:'"'+A.nombre+'"',s:'CEDE: '+A.ciudad+', '+A.recinto+' '+A.fechas,hd:AREAS.map((a,i)=>({l:ar[i][0],p:PI(a.id+':h')})),ax:AREAS.map((a,i)=>({l:ar[i][1],p:PI(a.id+':x')})),pr:PI('PR'),
+rows:AREAS.flatMap((a,ai)=>a.deps.filter(pres).map(d=>({ai,n:d.n+(d.av?' (auxiliares: Audio, Video y Plataforma)':''),c:[0,1,2,3].map(i=>PI(d.id+':'+i))})))}}
+const PC=['#f4cccc','#d0e0e3','#fce5cd'];
+function vDpt(){const g=G(),c=p=>p?`<b>${esc(p.n)}</b><br>Cel: ${esc(p.t)}<br>${esc(p.c)}`:'<span class="mu">—</span>';
+return `<div class="r np"><button class="on" onclick="gPdf()">Descargar PDF</button><button onclick="gXls()">Descargar Excel</button></div><p class="mu">Vista previa. Los departamentos no presentes no se incluyen.</p>
+<div class="t"><h2>${esc(g.t)}</h2>${esc(g.l)}<br>${esc(g.s)}</div>
+<div class="w"><table><tr>${g.hd.map(h=>`<td><i>${h.l}</i><br>${c(h.p)}</td>`).join('')}</tr><tr>${g.ax.map(h=>`<td><i>${h.l}</i><br>${c(h.p)}</td>`).join('')}</tr></table></div>
+<p><b>Presidente de la Asamblea Regional:</b> ${g.pr?esc(g.pr.n)+' · '+esc(g.pr.c):'<span class="mu">(sin asignar)</span>'}</p>
+<div class="w"><table><tr><th>Departamento</th><th>Superintendente</th><th>Auxiliar A</th><th>Auxiliar B</th><th>Auxiliar C</th></tr>${g.rows.map(r=>`<tr><th style="background:${PC[r.ai]};color:#000">${esc(r.n)}</th>${r.c.map(p=>`<td>${c(p)}</td>`).join('')}</tr>`).join('')}</table></div>`}
+async function gPdf(){try{const {PDFDocument,StandardFonts,rgb}=PDFLib,g=G(),doc=await PDFDocument.create(),pg=doc.addPage([612,792]),F=await doc.embedFont(StandardFonts.Helvetica),B=await doc.embedFont(StandardFonts.HelveticaBold);
+const cl=s=>String(s||'').replace(/[^\u0020-\u007E\u00A0-\u00FF]/g,''),h2=x=>rgb(parseInt(x.slice(1,3),16)/255,parseInt(x.slice(3,5),16)/255,parseInt(x.slice(5,7),16)/255);
+const box=(x,t,w,h,f)=>pg.drawRectangle({x,y:792-t-h,width:w,height:h,color:f?h2(f):undefined,borderColor:rgb(0,0,0),borderWidth:.5});
+const tx=(s,x,t,w,sz,f,ct,mn)=>{s=cl(s);mn=mn||4.5;while(sz>mn&&f.widthOfTextAtSize(s,sz)>w)sz-=.25;while(s.length>1&&f.widthOfTextAtSize(s,sz)>w)s=s.slice(0,-2)+'…';pg.drawText(s,{x:ct?x+(w-f.widthOfTextAtSize(s,sz))/2:x,y:792-t-sz,size:sz,font:f})};
+const wr=(s,w,sz,f)=>{const o=[];let c='';cl(s).split(' ').forEach(x=>{const n=c?c+' '+x:x;if(f.widthOfTextAtSize(n,sz)>w&&c){o.push(c);c=x}else c=n});if(c)o.push(c);return o};
+const pc=(p,x,t,w)=>{if(!p)return;tx(p.n,x+3,t+3,w-6,7,B);tx('Cel: '+p.t,x+3,t+13,w-6,6.5,F);tx(p.c,x+3,t+22,w-6,6.5,F)};
+tx(g.t,30,30,552,11,B,1);tx(g.l,30,45,552,9,F,1);tx(g.s,30,58,552,8,F,1);
+box(30,72,552,14,'#d9ead3');tx('COMITÉ DE ASAMBLEA REGIONAL',30,75,552,9,B,1);
+[g.hd,g.ax].forEach((r,j)=>r.forEach((h,i)=>{const x=30+i*184,t=86+j*40;box(x,t,184,40,PC[i]);tx(h.l,x+3,t+3,178,6.5,B);pc(h.p,x,t+8,184)}));
+box(30,166,552,16,'#d9d2e9');tx('Presidente de la Asamblea Regional: '+(g.pr?g.pr.n+'  '+g.pr.c:''),33,170,546,7.5,B);
+['Departamento','Superintendente','Auxiliar A','Auxiliar B','Auxiliar C'].forEach((h,i)=>{const x=i?126+(i-1)*114:30,w=i?114:96;box(x,186,w,14);tx(h,x,189,w,7.5,B,1)});
+const rh=Math.min(34,(762-200)/Math.max(1,g.rows.length));
+g.rows.forEach((r,k)=>{const t=200+k*rh;box(30,t,96,rh,PC[r.ai]);wr(r.n,90,6.5,B).slice(0,4).forEach((l,i)=>tx(l,33,t+3+i*7.5,90,6.5,B));r.c.forEach((p,i)=>{const x=126+i*114;box(x,t,114,rh);pc(p,x,t,114)})});
+await sv('Directorio de departamentos.pdf',await doc.save())}catch(e){alert('Error al generar el PDF: '+e.message)}}
+async function gXls(){try{const g=G(),wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('Directorio');ws.columns=[{width:30},{width:34},{width:34},{width:34},{width:34}];
+const CL=['FFF4CCCC','FFD0E0E3','FFFCE5CD'],fl=c=>({type:'pattern',pattern:'solid',fgColor:{argb:c}}),bd={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
+const pt=p=>p?p.n+'\nCel: '+p.t+'\n'+p.c:'';
+const mg=(v,c,f,b,ht)=>{const r=ws.addRow([v]);ws.mergeCells(r.number,1,r.number,5);const x=r.getCell(1);x.alignment={horizontal:'center',vertical:'middle',wrapText:true};x.font={bold:!!b};if(f)x.fill=fl(f);if(ht)r.height=ht};
+mg(g.t,0,0,1);mg(g.l);mg(g.s);mg('COMITÉ DE ASAMBLEA REGIONAL',0,'FFD9EAD3',1);
+[g.hd,g.ax].forEach(a=>{const r1=ws.addRow(['',...a.map(h=>h.l)]),r2=ws.addRow(['',...a.map(h=>pt(h.p))]);r2.height=48;[r1,r2].forEach((r,j)=>[2,3,4].forEach(i=>{const x=r.getCell(i);x.fill=fl(CL[i-2]);x.border=bd;x.alignment={wrapText:true,vertical:'top'};if(!j)x.font={bold:true}}))});
+const rp=ws.addRow(['Presidente de la Asamblea Regional',pt(g.pr)]);ws.mergeCells(rp.number,2,rp.number,5);rp.height=48;rp.getCell(1).font={bold:true};rp.getCell(1).fill=rp.getCell(2).fill=fl('FFD9D2E9');[1,2].forEach(i=>{rp.getCell(i).border=bd;rp.getCell(i).alignment={wrapText:true,vertical:'top'}});
+const hr=ws.addRow(['Departamento','Superintendente','Auxiliar A','Auxiliar B','Auxiliar C']);hr.eachCell(x=>{x.font={bold:true};x.border=bd;x.alignment={horizontal:'center'}});
+g.rows.forEach(r=>{const w=ws.addRow([r.n,...r.c.map(pt)]);w.height=48;w.eachCell((x,i)=>{x.border=bd;x.alignment={wrapText:true,vertical:'top'};if(i==1){x.fill=fl(CL[r.ai]);x.font={bold:true}}})});
+await sv('Directorio de departamentos.xlsx',await wb.xlsx.writeBuffer())}catch(e){alert('Error al generar el Excel: '+e.message)}}
+/* Importar PDF */
+function cards(it){const PV=/^(Anciano|Siervo ministerial|Precursor( regular| auxiliar)?|Publicador( bautizado| no bautizado)?)$/i;
+const LN=a=>{const G=[];a.slice().sort((p,q)=>p.t-q.t).forEach(x=>{let g=G.find(g=>Math.abs(g.t-x.t)<2.5);if(!g)G.push(g={t:x.t,c:[]});g.c.push(x)});return G.map(g=>g.c.sort((p,q)=>p.x-q.x).reduce((s,x,i,r)=>s+(i&&x.x-(r[i-1].x+r[i-1].w)>=1.5?' ':'')+x.s,''))};
+const an=it.filter(a=>PV.test(a.s)).sort((a,b)=>a.t-b.t);
+an.forEach((a,i)=>{const end=i+1<an.length?an[i+1].t-1:1e9,rg=it.filter(x=>x.t>=a.t-3&&x.t<end);
+ const nx=rg.filter(x=>x.x>a.x+60&&Math.abs(x.t-a.t)<4).sort((p,q)=>p.x-q.x)[0];if(!nx)return;
+ const nom=rg.filter(x=>Math.abs(x.x-nx.x)<6&&x.t>=a.t-3&&x.t<a.t+22&&!/correo|@/i.test(x.s)).sort((p,q)=>p.t-q.t).map(x=>x.s).join(' ');
+ const cong=rg.filter(x=>x.x<a.x-20&&Math.abs(x.t-a.t)<4).map(x=>x.s).join(' ');
+ const em=(LN(rg.filter(x=>x.x>=nx.x-6)).join(' ').match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/)||[''])[0];
+ const ph=LN(rg.filter(x=>x.x>=a.x-6&&x.x<nx.x-10&&x.t>a.t+10)).map(s=>(s.match(/\+?\d[\d\s().-]{5,}/)||[''])[0].trim()).filter(Boolean)[0]||'';
+ const c=nom.indexOf(',');const nombre=c>0?nom.slice(c+1).trim()+' '+nom.slice(0,c).trim():nom;
+ RV.push({nombre,cong,tel:ph,correo:em,ok:!!nombre})})}
+
+let RV=[];
+async function impP(F){const rv=document.getElementById('rv');rv.innerHTML='Leyendo PDF…';
+try{pdfjsLib.GlobalWorkerOptions.workerSrc='lib/pdf.worker.min.js';
+const pdf=await pdfjsLib.getDocument({data:await F.arrayBuffer()}).promise,rows=[];RV=[];
+for(let n=1;n<=pdf.numPages;n++){const pg=await pdf.getPage(n),tc=await pg.getTextContent(),L=[];cards(tc.items.filter(t=>t.str.trim()).map(t=>({x:t.transform[4],t:pg.view[3]-t.transform[5],w:t.width,s:t.str.trim()})));
+tc.items.filter(t=>t.str.trim()).forEach(t=>{const y=t.transform[5];let l=L.find(l=>Math.abs(l.y-y)<3);if(!l)L.push(l={y,c:[]});l.c.push({x:t.transform[4],w:t.width,s:t.str.trim()})});
+L.sort((a,b)=>b.y-a.y).forEach(l=>{l.c.sort((a,b)=>a.x-b.x);const cells=[];l.c.forEach((c,i)=>{const p=l.c[i-1];if(p&&c.x-(p.x+p.w)<6)cells[cells.length-1]+=' '+c.s;else cells.push(c.s)});rows.push(cells)})}
+if(RV.length){rvR();return}const em=/[\w.+-]+@[\w-]+(\.[\w-]+)+/,ph=/\+?\d[\d\s().-]{7,}\d/;let hd=null;
+rows.forEach(c=>{const j=c.join(' | ').toLowerCase();if(!hd&&/nombre/.test(j)&&/(correo|mail|tel)/.test(j)){hd=c.map(x=>x.toLowerCase());return}
+const t=c.join('  '),e=(t.match(em)||[''])[0],tel=(t.match(ph)||[''])[0];if(!e&&!tel)return;let nombre,cong;
+if(hd&&hd.length==c.length){const g=re=>{const k=hd.findIndex(x=>re.test(x));return k>=0?c[k]:''};nombre=g(/nombre/);cong=g(/cong/)}
+else{const r=c.filter(x=>!x.includes('@')&&!ph.test(x));nombre=r[0]||'';cong=r[1]||''}
+RV.push({nombre,cong,tel,correo:e,ok:!!nombre})});rvR()}catch(e){rv.innerHTML='<p class="wn">No se pudo leer el PDF: '+esc(e.message)+'</p>'}}
+function rvR(){const rv=document.getElementById('rv');if(!RV.length){rv.innerHTML='<p class="wn">No se detectaron filas con teléfono o correo. Si el PDF es escaneado o tiene otro formato, conviértelo a CSV.</p>';return}
+rv.innerHTML=`<div class="cd"><b>Revisión: ${RV.length} filas detectadas</b> <span class="mu">Corrige lo necesario y desmarca lo que no sirva.</span><div class="w"><table><tr><th></th><th>Nombre</th><th>Congregación</th><th>Teléfono</th><th>Correo</th></tr>${RV.map((r,i)=>`<tr><td><input type="checkbox" ${r.ok?'checked':''} onchange="RV[${i}].ok=this.checked"></td>${['nombre','cong','tel','correo'].map(k=>`<td><input value="${esc(r[k])}" oninput="RV[${i}].${k}=this.value"></td>`).join('')}</tr>`).join('')}</table></div><div class="r"><button onclick="rvOk()">Importar seleccionadas</button><button onclick="document.getElementById('rv').innerHTML=''">Cancelar</button></div></div>`}
+function rvOk(){const seen=new Set(S.people.map(p=>(p.correo||p.nombre).toLowerCase()));let n=0;RV.filter(r=>r.ok&&r.nombre.trim()).forEach(r=>{const k=(r.correo||r.nombre).toLowerCase();if(seen.has(k))return;seen.add(k);S.people.push({id:uid(),nombre:r.nombre.trim(),cong:r.cong.trim(),tel:r.tel.trim(),correo:r.correo.trim()});n++});RV=[];save();alert(n+' personas importadas.');render()}
+async function ldT(i){TPL=await i.files[0].arrayBuffer();await idb('set',TPL);render()}
+async function mk(r){const {PDFDocument,StandardFonts,PDFName,PDFDict}=PDFLib,A=S.asm;const doc=await PDFDocument.load(TPL),form=doc.getForm(),pg=doc.getPage(0);
+const fs=form.getFields().filter(f=>f.acroField.getWidgets().length).sort((a,b)=>b.acroField.getWidgets()[0].getRectangle().y-a.acroField.getWidgets()[0].getRectangle().y);
+const v=[A.fcarta,r.p.nombre,r.puesto,A.ciudad,A.fechas,r.sup?r.sup.nombre:'',r.directo?r.directo.nombre:'',r.sup?r.sup.correo:'','"'+A.nombre+'"',''];
+const fb=await doc.embedFont(StandardFonts.TimesRomanBold),fr=await doc.embedFont(StandardFonts.TimesRoman);
+fs.forEach((f,i)=>{if(f.setText&&v[i]!==undefined)f.setText(v[i])});form.updateFieldAppearances(fb);
+const an=pg.node.Annots();if(an)for(let i=an.size()-1;i>=0;i--){const a=an.lookup(i,PDFDict);if(a.get(PDFName.of('Subtype'))===PDFName.of('FreeText'))an.remove(i)}
+const c=(t,y,s,f)=>pg.drawText(t,{x:(612-f.widthOfTextAtSize(t,s))/2,y,size:s,font:f});
+c('ASAMBLEA REGIONAL DE LOS TESTIGOS DE JEHOVÁ',722,17,fb);c(A.tit2,704,12,fr);c(A.recinto,689,9,fr);return doc.save()}
+const fn=r=>('Carta - '+r.p.nombre+' - '+r.puesto).replace(/[^\wáéíóúñÁÉÍÓÚÑ \-]/g,'')+'.pdf';
+async function one(j){const r=recips()[j];try{await sv(fn(r),await mk(r))}catch(e){alert('Error al generar la carta: '+e.message)}}
+async function zipAll(){try{const z=new JSZip();for(const r of recips())z.file(fn(r),await mk(r));await sv('Cartas de invitación.zip',await z.generateAsync({type:'uint8array'}))}catch(e){alert('Error al generar las cartas: '+e.message)}}
+render();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script></body></html>
