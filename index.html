@@ -77,8 +77,9 @@ function render(){document.getElementById('ev').innerHTML=evSel();document.getEl
 document.getElementById('v').innerHTML=({asm:vAsm,dir:vDir,asg:vAsg,org:vOrg,dds:vDds,dpt:vDpt,cartas:vCartas,log:vLog})[T]();if(T=='dir')tb();if(T=='log')lgb()}
 function hdr(){const a=S.asm;return `<div class="t"><h2>${esc(a.nombre)}</h2><div>${esc(a.tit2)}</div><div class="mu">${esc(a.recinto)}</div></div>`}
 /* Asamblea */
-function vAsm(){const L={nombre:'Nombre de la asamblea',tit2:'Encabezado (línea 2)',recinto:'Lugar / recinto (línea 3)',ciudad:'Sede (texto de la carta)',fechas:'Fechas (texto de la carta)'};
+function vAsm(){const L={nombre:'Nombre de la asamblea',tit2:'Encabezado (línea 2)',recinto:'Lugar / recinto (línea 3)',ciudad:'Sede (texto de la carta)',fechas:'Fechas (texto de la carta)',codigo:'Código para nombrar archivos (ej. AR27-S001)'};
 return `<h2>Datos de la asamblea</h2><p class="mu">Se usan como encabezado en organigrama, directorios y cartas.</p><div class="f">${Object.keys(L).map(k=>`<label>${L[k]}<input value="${esc(S.asm[k])}" oninput="S.asm.${k}=this.value;save()"></label>`).join('')}</div>
+<h2 style="margin-top:20px">Presidente de la Asamblea Regional</h2><div class="cd"><span class="mu">Opcional; también puede llenarse a mano en el directorio impreso.</span>${sel('PR')}</div>
 ${cartaCfg()}
 <h2 style="margin-top:20px">Tu nombre</h2><div class="f"><label>Aparece en el registro de cambios<input value="${esc(lsg('asamblea-user')||'')}" onchange="lss('asamblea-user',this.value.trim())"></label></div>
 <h2 style="margin-top:20px">Eventos</h2><p class="mu">Cada evento tiene su propio directorio, asignaciones y datos. Cambia de evento con el selector de arriba. Un evento nuevo empieza vacío: importa su directorio (CSV o PDF).</p><div class="r"><button onclick="evNew(0)">Nuevo evento</button><button onclick="evRen()">Renombrar</button><button onclick="evDel()">Eliminar</button></div>
@@ -112,7 +113,7 @@ function selOld(k){const u=used(),cur=S.as[k];return `<select onchange="setA('${
 function setA(k,v){const pr=S.as[k];if(v&&pr!=v&&used().has(v)){alert('Esa persona ya tiene otra asignación.');render();return}if(pr&&pr!=v){const q=P(pr);lg('Quitó a '+(q?q.nombre:'—')+' de '+kl(k))}if(v){if(pr!=v)lg('Asignó a '+P(v).nombre+': '+kl(k));S.as[k]=v}else delete S.as[k];save();render()}
 function vAsg(){const a=AREAS.find(x=>x.id==AR);
 return `<div class="r np">${AREAS.map(x=>`<button class="${x.id==AR?'on':''}" onclick="AR='${x.id}';render()">${x.h}</button>`).join('')}</div>
-<p class="mu">Cada persona solo puede tener una asignación; el selector muestra únicamente a quienes están libres.</p><div class="cd"><b>Presidente de la Asamblea Regional (opcional)</b>${sel('PR')}</div>
+<p class="mu">Cada persona solo puede tener una asignación; el selector muestra únicamente a quienes están libres.</p>
 <div class="cd"><b>${a.h}</b>${sel(a.id+':h')}<b>Auxiliar</b>${sel(a.id+':x')}</div>
 ${a.deps.map(d=>`<div class="cd"><label><input type="checkbox" ${pres(d)?'checked':''} onchange="setPres('${d.id}',this.checked)"> <b>${d.n}</b></label>${pres(d)?slots(d).map((l,i)=>`<div class="mu">${l}${i==3&&!d.av?' (opcional)':''}</div>${sel(d.id+':'+i)}`).join(''):'<div class="mu">No presente en esta asamblea</div>'}</div>`).join('')}`}
 /* Organigrama */
@@ -120,27 +121,27 @@ function lines(d){return slots(d).map((l,i)=>{if(!S.as[d.id+':'+i])return'';cons
 function vOrg(){return `<div class="np r"><button onclick="window.print()">Imprimir / PDF</button></div>${hdr()}<div class="g3">${AREAS.map(a=>`<div><div class="bx t"><b>${a.h}</b>${nm(a.id+':h')}</div><div class="bx t"><b>Auxiliar</b>${nm(a.id+':x')}</div>${a.deps.filter(pres).map(d=>`<div class="bx"><b>${d.n}</b>${lines(d)}</div>`).join('')}</div>`).join('')}</div>`}
 /* Directorios */
 function row(l,k){const p=P(S.as[k]);return p?`<tr><td>${l}</td><td>${esc(p.nombre)}</td><td>${esc(p.cong)}</td><td>${esc(p.tel)}</td><td>${esc(p.correo)}</td></tr>`:''}
-function vDds(){return `<div class="np r"><button onclick="window.print()">Imprimir / PDF</button></div>${hdr()}${AREAS.map(a=>`<h2>${a.h}</h2><div class="w"><table><thead><tr><th>Puesto</th><th>Nombre</th><th>Congregación</th><th>Teléfono</th><th>Correo</th></tr></thead><tbody>${row(a.h,a.id+':h')}${row('Auxiliar',a.id+':x')}${a.deps.filter(pres).map(d=>`<tr><th colspan="5">${d.n}</th></tr>`+slots(d).map((l,i)=>row(l,d.id+':'+i)).join('')).join('')}</tbody></table></div>`).join('')}`}
+function vDds(){return `<div class="np r"><button onclick="window.print()">Imprimir / PDF</button></div>${hdr()}${AREAS.map(a=>`<h2>${a.h}</h2><div class="w"><table><thead><tr><th>Asignación</th><th>Nombre</th><th>Congregación</th><th>Teléfono</th><th>Correo</th></tr></thead><tbody>${row(a.h,a.id+':h')}${row('Auxiliar',a.id+':x')}${a.deps.filter(pres).map(d=>`<tr><th colspan="5">${d.n}</th></tr>`+slots(d).map((l,i)=>row(l,d.id+':'+i)).join('')).join('')}</tbody></table></div>`).join('')}`}
 /* Cartas */
 let CF='all',CS='all';
 const CSL={p:'Pendiente',e:'Enviada',a:'Aceptó',d:'Declinó'};
 const USR=()=>lsg('asamblea-user')||'';
 function lg(x){S.log=S.log||[];S.log.push({t:Date.now(),u:USR(),x});if(S.log.length>3000)S.log.splice(0,500)}
 const csOf=r=>{const c=(S.cs||{})[r.k];return c&&c.p==r.p.id?c.e:'p'};
-function recips(){const o=[];AREAS.forEach(a=>{const sup=P(S.as[a.id+':h']);a.deps.filter(pres).forEach(d=>slots(d).forEach((l,i)=>{const p=P(S.as[d.id+':'+i]);if(!p)return;o.push({p,a,d,i,sup,k:d.id+':'+i,directo:i?P(S.as[d.id+':0']):null,puesto:i==0?`${l} de ${d.n}`:(d.av?l:`Auxiliar de ${d.n}`)})}))});return o}
+function recips(){const o=[];AREAS.forEach(a=>{const sup=P(S.as[a.id+':h']);a.deps.filter(pres).forEach(d=>slots(d).forEach((l,i)=>{const p=P(S.as[d.id+':'+i]);if(!p)return;o.push({p,a,d,i,sup,k:d.id+':'+i,directo:i?P(S.as[d.id+':0']):null,puesto:i==0?`${l} de ${d.n.replace(/\s*\(.*?\)/g,'')}`:(d.av?l:`Auxiliar de ${d.n.replace(/\s*\(.*?\)/g,'')}`)})}))});return o}
 function crs(){return recips().filter(r=>(CF=='all'||r.a.id==CF)&&(CS=='all'||csOf(r)==CS))}
 function vCartas(){const A=recips(),R=crs(),n=e=>A.filter(r=>csOf(r)==e).length;
 return `<h2>Cartas de invitación (${A.length})</h2><p class="mu">${n('p')} pendientes · ${n('e')} enviadas · ${n('a')} aceptaron · ${n('d')} declinaron</p>
 ${tplUI()}${hdrWarn()}
 <div class="r np"><select onchange="CF=this.value;render()"><option value="all">Todas las áreas</option>${AREAS.map(a=>`<option value="${a.id}"${a.id==CF?' selected':''}>${a.h}</option>`).join('')}</select><select onchange="CS=this.value;render()"><option value="all">Todos los estados</option>${Object.keys(CSL).map(k=>`<option value="${k}"${k==CS?' selected':''}>${CSL[k]}</option>`).join('')}</select></div>
 <div class="r np"><button onclick="zipAll()" ${TPL&&R.length?'':'disabled'}>Descargar visibles (ZIP)</button><button onclick="envAll()" ${R.some(r=>csOf(r)=='p')?'':'disabled'}>Marcar pendientes visibles como enviadas</button><button onclick="expCS()">Exportar estado (CSV)</button></div>
-<div class="w"><table><thead><tr><th>Nombre</th><th>Puesto</th><th>Supervisa (correo)</th><th>Estado</th><th></th></tr></thead><tbody>${R.map((r,j)=>`<tr><td>${esc(r.p.nombre)}</td><td>${esc(r.puesto)}</td><td>${r.sup?esc(r.sup.nombre)+' ('+(esc(r.sup.correo)||'<span class="wn">sin correo</span>')+')':'<span class="wn">falta superintendente de área</span>'}</td><td><select onchange="setCS('${r.k}',this.value)">${Object.keys(CSL).map(k=>`<option value="${k}"${k==csOf(r)?' selected':''}>${CSL[k]}</option>`).join('')}</select></td><td><button ${TPL?'':'disabled'} onclick="one(${j})">Descargar</button></td></tr>`).join('')}</tbody></table></div>`}
+<div class="w"><table><thead><tr><th>Nombre</th><th>Asignación</th><th>Supervisa (correo)</th><th>Estado</th><th></th></tr></thead><tbody>${R.map((r,j)=>`<tr><td>${esc(r.p.nombre)}</td><td>${esc(r.puesto)}</td><td>${r.sup?esc(r.sup.nombre)+' ('+(esc(r.sup.correo)||'<span class="wn">sin correo</span>')+')':'<span class="wn">falta superintendente de área</span>'}</td><td><select onchange="setCS('${r.k}',this.value)">${Object.keys(CSL).map(k=>`<option value="${k}"${k==csOf(r)?' selected':''}>${CSL[k]}</option>`).join('')}</select></td><td><button ${TPL?'':'disabled'} onclick="one(${j})">Descargar</button></td></tr>`).join('')}</tbody></table></div>`}
 function setCS(k,e){const r=recips().find(x=>x.k==k);if(!r)return;S.cs=S.cs||{};
 if(e=='d'&&confirm(r.p.nombre+' declinó. ¿Quitar su asignación y marcarlo como "sin participación"?')){lg('Declinó la invitación: '+r.p.nombre+' ('+r.puesto+')');delete S.cs[k];doNo(r.p.id,true);save();render();return}
 S.cs[k]={e,p:r.p.id,t:Date.now()};lg('Carta de '+r.p.nombre+' ('+r.puesto+'): '+CSL[e]);save();render()}
 function envAll(){S.cs=S.cs||{};let n=0;crs().filter(r=>csOf(r)=='p').forEach(r=>{S.cs[r.k]={e:'e',p:r.p.id,t:Date.now()};n++});if(n)lg('Marcó '+n+(n==1?' carta':' cartas')+' como enviada'+(n==1?'':'s'));save();render()}
 const qc=s=>'"'+String(s).replace(/"/g,'""')+'"';
-function expCS(){sv('Estado de cartas.csv','\uFEFF'+['Nombre,Puesto,Área,Estado',...recips().map(r=>[r.p.nombre,r.puesto,r.a.h,CSL[csOf(r)]].map(qc).join(','))].join('\n'))}
+function expCS(){sv('Estado de cartas.csv','\uFEFF'+['Nombre,Asignación,Área,Estado',...recips().map(r=>[r.p.nombre,r.puesto,r.a.h,CSL[csOf(r)]].map(qc).join(','))].join('\n'))}
 function vLog(){return `<h2>Registro de cambios (${(S.log||[]).length})</h2><p class="mu">Se guarda por evento y se incluye en sus respaldos.</p><div class="r np"><input id="lq" placeholder="Buscar en el registro…" oninput="lgb()" style="flex:1;min-width:200px"><button onclick="expLog()">Exportar CSV</button></div><div class="w"><table><thead><tr><th>Fecha</th><th>Quién</th><th>Cambio</th></tr></thead><tbody id="lb"></tbody></table></div>`}
 function lgb(){const q=nz(document.getElementById('lq')?.value||'');document.getElementById('lb').innerHTML=(S.log||[]).slice().reverse().filter(e=>!q||nz(e.x+' '+e.u).includes(q)).slice(0,300).map(e=>`<tr><td>${new Date(e.t).toLocaleString('es-MX')}</td><td>${esc(e.u||'—')}</td><td>${esc(e.x)}</td></tr>`).join('')}
 function expLog(){sv('Registro de cambios.csv','\uFEFF'+['Fecha,Quién,Cambio',...(S.log||[]).map(e=>[new Date(e.t).toLocaleString('es-MX'),e.u||'',e.x].map(qc).join(','))].join('\n'))}
@@ -260,9 +261,10 @@ fs.forEach((f,i)=>{if(f.setText&&v[i]!==undefined)f.setText(v[i])});form.updateF
 const hm=A.hmode||'texto',an=pg.node.Annots();if(hm!='ninguno'&&an)for(let i=an.size()-1;i>=0;i--){const a=an.lookup(i,PDFDict);if(a.get(PDFName.of('Subtype'))===PDFName.of('FreeText'))an.remove(i)}
 const c=(t,y,s,f)=>pg.drawText(t,{x:(612-f.widthOfTextAtSize(t,s))/2,y,size:s,font:f});
 if(hm=='texto'){c('ASAMBLEA REGIONAL DE LOS TESTIGOS DE JEHOVÁ',722,17,fb);c(A.tit2,704,12,fr);c(A.recinto,689,9,fr)}else if(hm=='imagen'&&HDR){const im=HDR.startsWith('data:image/png')?await doc.embedPng(HDR):await doc.embedJpg(HDR),sc=Math.min(612/im.width,128/im.height),w=im.width*sc,h=im.height*sc;pg.drawImage(im,{x:(612-w)/2,y:792-h,width:w,height:h})}return doc.save()}
-const fn=r=>('Carta - '+r.p.nombre+' - '+r.puesto).replace(/[^\wáéíóúñÁÉÍÓÚÑ \-]/g,'')+'.pdf';
+const fym=()=>{const m=(fcartaTxt()||'').match(/^(\d\d)-(\d\d)-(\d{4})$/);if(m)return m[3]+m[2];const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')};
+const fn=r=>[fym(),(S.asm.codigo||'').trim(),r.puesto+' - '+r.p.nombre].filter(Boolean).join(' ').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,' ').trim()+'.pdf';
 async function one(j){const r=crs()[j];try{await sv(fn(r),await mk(r))}catch(e){alert('Error al generar la carta: '+e.message)}}
-async function zipAll(){try{const z=new JSZip();for(const r of crs())z.file(fn(r),await mk(r));await sv('Cartas de invitación.zip',await z.generateAsync({type:'uint8array'}))}catch(e){alert('Error al generar las cartas: '+e.message)}}
+async function zipAll(){try{const z=new JSZip();const us={};for(const r of crs()){let n=fn(r);us[n]=(us[n]||0)+1;if(us[n]>1)n=n.replace(/\.pdf$/,' ('+us[n]+').pdf');z.file(n,await mk(r))}await sv('Cartas de invitación.zip',await z.generateAsync({type:'uint8array'}))}catch(e){alert('Error al generar las cartas: '+e.message)}}
 render();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script></body></html>
