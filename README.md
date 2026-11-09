@@ -27,6 +27,11 @@ En *Directorio* marca la casilla "Sin particip." para quien no acepta o no puede
 - En *Cartas* cada invitación tiene estado: Pendiente, Enviada, Aceptó o Declinó. Se puede filtrar por área y estado, marcar las pendientes visibles como enviadas y exportar el estado a CSV. Si marcas "Declinó", la app ofrece quitar la asignación y marcar a la persona como sin participación. Si cambia la persona asignada a un puesto, el estado vuelve a Pendiente.
 - Un evento nuevo siempre empieza vacío; su directorio se importa desde un CSV o PDF nuevo.
 
+## Fecha y encabezado de las cartas
+En *Asamblea → Fecha y encabezado de las cartas*:
+- **Fecha:** por defecto se usa la fecha del día en que generas la carta; desmarca "Usar la fecha actual" para elegir otra.
+- **Encabezado:** *Escrito* (título, línea 2 y lugar tomados de los datos de la asamblea), *Imagen subida por mí* (se coloca arriba, ajustada al ancho de la hoja y hasta 128 pt de alto; cada evento guarda la suya) o *Ninguno* (cuando la plantilla PDF ya trae su encabezado, como `cartav2.pdf`). La imagen va en los respaldos del evento.
+
 ## Plantilla de la carta (PDF)
 La app busca la plantilla en `plantilla/carta.pdf` (dentro del mismo sitio). Para usarla desde la nube:
 1. Deja los campos de tu PDF **vacíos** (sin nombres ni correos de personas).
@@ -44,7 +49,7 @@ Los datos NO se sincronizan: cada navegador tiene los suyos. Para pasarlos de un
 
 ## Actualizar la app
 1. Reemplaza `index.html` en el repositorio.
-2. Cambia `VERSION` en `sw.js` (por ejemplo `asamblea-v1.5`) para que los dispositivos descarguen la nueva versión.
+2. Cambia `VERSION` en `sw.js` (por ejemplo `asamblea-v1.6`) para que los dispositivos descarguen la nueva versión.
 
 ## Funciona sin internet
 Las librerías (PDF, ZIP, Excel, lectura de PDF) están incluidas en `lib/`, así que la app funciona sin conexión después de la primera visita.

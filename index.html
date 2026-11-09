@@ -54,7 +54,7 @@ const AREAS=[
 {id:'AC',h:'Coordinador del Comité de Asamblea',deps:[D('acom','Acomodadores'),D('cont','Contabilidad'),D('est','Estacionamiento'),D('pa','Primeros Auxilios'),D('seg','Seguridad',{co:1})]},
 {id:'AP',h:'Superintendente del programa',deps:[D('av','Audio y Video',{av:1}),D('bau','Bautismo'),D('it','Interpretación táctil (solo lengua de señas)',{opt:1})]},
 {id:'AA',h:'Superintendente de Alojamiento',deps:[D('alo','Alojamiento'),D('isv','Información y Servicio Voluntario'),D('ins','Instalación',{opt:1}),D('lim','Limpieza'),D('ogg','Objetos Perdidos y Guardarropa'),D('tm','Transporte y Materiales',{opt:1}),D('agua','Agua potable')]}];
-const DEF={asm:{nombre:'Felices para siempre',tit2:'PACHUCA HGO. #01 | 22/05/26 - 24/05/26',recinto:'Auditorio Gota de Plata de Pachuca de Soto, Hgo.',ciudad:'Pachuca Hidalgo',fechas:'22-24 de mayo 2026',fcarta:'26-01-2026'},people:[],as:{},pres:{},log:[],cs:{}};
+const DEF={asm:{nombre:'Felices para siempre',tit2:'PACHUCA HGO. #01 | 22/05/26 - 24/05/26',recinto:'Auditorio Gota de Plata de Pachuca de Soto, Hgo.',ciudad:'Pachuca Hidalgo',fechas:'22-24 de mayo 2026',fcarta:''},people:[],as:{},pres:{},log:[],cs:{}};
 let S=JSON.parse(JSON.stringify(DEF)),T='asm',AR='AC',TPL=null,DL=null;
 let EV;try{EV=JSON.parse(localStorage.getItem('asamblea-ev'))}catch(e){}
 if(!EV||!EV.list||!EV.list.length){let o;try{o=JSON.parse(localStorage.getItem('asamblea-v1'))}catch(e){}EV={cur:'e1',list:[{id:'e1',n:(o&&o.asm&&o.asm.nombre)||'Asamblea 1'}]};if(o)S=Object.assign(S,o)}
@@ -67,7 +67,7 @@ const slots=d=>[d.co?'Coordinador':'Superintendente',...(d.av?['Auxiliar Audio',
 const used=()=>new Set(Object.entries(S.as).filter(([k])=>{const i=k.split(':')[0];const d=AREAS.flatMap(a=>a.deps).find(x=>x.id==i);return !d||pres(d)}).map(e=>e[1]));
 const nm=k=>{const p=P(S.as[k]);return p?esc(p.nombre):'<span class="mu">—</span>'};
 (window.claude?window.claude.use('downloads'):Promise.resolve(null)).then(d=>{DL=d;if(T=='cartas'||T=='asm')render()}).catch(()=>{});
-const idb=(m,v)=>new Promise(r=>{try{const q=indexedDB.open('asm',1);q.onupgradeneeded=()=>q.result.createObjectStore('k');q.onsuccess=()=>{const s=q.result.transaction('k',m=='get'?'readonly':'readwrite').objectStore('k');const x=m=='get'?s.get('tpl'):s.put(v,'tpl');x.onsuccess=()=>r(x.result);x.onerror=()=>r()};q.onerror=()=>r()}catch(e){r()}});
+const idb=(m,v,k='tpl')=>new Promise(r=>{try{const q=indexedDB.open('asm',1);q.onupgradeneeded=()=>q.result.createObjectStore('k');q.onsuccess=()=>{const s=q.result.transaction('k',m=='get'?'readonly':'readwrite').objectStore('k');const x=m=='get'?s.get(k):m=='del'?s.delete(k):s.put(v,k);x.onsuccess=()=>r(x.result);x.onerror=()=>r()};q.onerror=()=>r()}catch(e){r()}});
 
 async function sv(name,data){if(!DL){const a=document.createElement('a');a.href=URL.createObjectURL(data instanceof Blob?data:new Blob([data]));a.download=name;a.click();return}try{await DL.save({filename:name,data})}catch(e){if(e.code!='declined')alert('No se pudo guardar: '+(e.message||e.code))}}
 const ICO={'log':'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>','asm': '<rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/>', 'dir': '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 4.6a3.5 3.5 0 010 6.8M18 14.8c2 .7 3.2 2.4 3.6 5.2"/>', 'asg': '<path d="M9 6h12M9 12h12M9 18h12M3 6l1.5 1.5L7 5M3 12l1.5 1.5L7 11M3 18l1.5 1.5L7 17"/>', 'org': '<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="2" y="16" width="6" height="5" rx="1"/><rect x="16" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M5 16v-4h14v4"/>', 'dds': '<path d="M14 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V9zM14 3v6h6M8 13h8M8 17h8"/>', 'dpt': '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/>', 'cartas': '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 6 10-6"/>'};
@@ -77,8 +77,9 @@ function render(){document.getElementById('ev').innerHTML=evSel();document.getEl
 document.getElementById('v').innerHTML=({asm:vAsm,dir:vDir,asg:vAsg,org:vOrg,dds:vDds,dpt:vDpt,cartas:vCartas,log:vLog})[T]();if(T=='dir')tb();if(T=='log')lgb()}
 function hdr(){const a=S.asm;return `<div class="t"><h2>${esc(a.nombre)}</h2><div>${esc(a.tit2)}</div><div class="mu">${esc(a.recinto)}</div></div>`}
 /* Asamblea */
-function vAsm(){const L={nombre:'Nombre de la asamblea',tit2:'Encabezado (línea 2)',recinto:'Lugar / recinto (línea 3)',ciudad:'Sede (texto de la carta)',fechas:'Fechas (texto de la carta)',fcarta:'Fecha de la carta'};
+function vAsm(){const L={nombre:'Nombre de la asamblea',tit2:'Encabezado (línea 2)',recinto:'Lugar / recinto (línea 3)',ciudad:'Sede (texto de la carta)',fechas:'Fechas (texto de la carta)'};
 return `<h2>Datos de la asamblea</h2><p class="mu">Se usan como encabezado en organigrama, directorios y cartas.</p><div class="f">${Object.keys(L).map(k=>`<label>${L[k]}<input value="${esc(S.asm[k])}" oninput="S.asm.${k}=this.value;save()"></label>`).join('')}</div>
+${cartaCfg()}
 <h2 style="margin-top:20px">Tu nombre</h2><div class="f"><label>Aparece en el registro de cambios<input value="${esc(lsg('asamblea-user')||'')}" onchange="lss('asamblea-user',this.value.trim())"></label></div>
 <h2 style="margin-top:20px">Eventos</h2><p class="mu">Cada evento tiene su propio directorio, asignaciones y datos. Cambia de evento con el selector de arriba. Un evento nuevo empieza vacío: importa su directorio (CSV o PDF).</p><div class="r"><button onclick="evNew(0)">Nuevo evento</button><button onclick="evRen()">Renombrar</button><button onclick="evDel()">Eliminar</button></div>
 <h2 style="margin-top:20px">Respaldos</h2><p class="mu">Se genera un archivo por evento; al importar se agrega como evento nuevo.</p><div class="r"><button onclick="expOne()">Exportar este evento</button><button onclick="expAll()">Exportar todos</button><label>Importar respaldo: <input type="file" accept=".json" onchange="impJ(this)"></label></div>`}
@@ -130,7 +131,7 @@ function recips(){const o=[];AREAS.forEach(a=>{const sup=P(S.as[a.id+':h']);a.de
 function crs(){return recips().filter(r=>(CF=='all'||r.a.id==CF)&&(CS=='all'||csOf(r)==CS))}
 function vCartas(){const A=recips(),R=crs(),n=e=>A.filter(r=>csOf(r)==e).length;
 return `<h2>Cartas de invitación (${A.length})</h2><p class="mu">${n('p')} pendientes · ${n('e')} enviadas · ${n('a')} aceptaron · ${n('d')} declinaron</p>
-${tplUI()}
+${tplUI()}${hdrWarn()}
 <div class="r np"><select onchange="CF=this.value;render()"><option value="all">Todas las áreas</option>${AREAS.map(a=>`<option value="${a.id}"${a.id==CF?' selected':''}>${a.h}</option>`).join('')}</select><select onchange="CS=this.value;render()"><option value="all">Todos los estados</option>${Object.keys(CSL).map(k=>`<option value="${k}"${k==CS?' selected':''}>${CSL[k]}</option>`).join('')}</select></div>
 <div class="r np"><button onclick="zipAll()" ${TPL&&R.length?'':'disabled'}>Descargar visibles (ZIP)</button><button onclick="envAll()" ${R.some(r=>csOf(r)=='p')?'':'disabled'}>Marcar pendientes visibles como enviadas</button><button onclick="expCS()">Exportar estado (CSV)</button></div>
 <div class="w"><table><thead><tr><th>Nombre</th><th>Puesto</th><th>Supervisa (correo)</th><th>Estado</th><th></th></tr></thead><tbody>${R.map((r,j)=>`<tr><td>${esc(r.p.nombre)}</td><td>${esc(r.puesto)}</td><td>${r.sup?esc(r.sup.nombre)+' ('+(esc(r.sup.correo)||'<span class="wn">sin correo</span>')+')':'<span class="wn">falta superintendente de área</span>'}</td><td><select onchange="setCS('${r.k}',this.value)">${Object.keys(CSL).map(k=>`<option value="${k}"${k==csOf(r)?' selected':''}>${CSL[k]}</option>`).join('')}</select></td><td><button ${TPL?'':'disabled'} onclick="one(${j})">Descargar</button></td></tr>`).join('')}</tbody></table></div>`}
@@ -189,15 +190,15 @@ await sv('Directorio de departamentos.xlsx',await wb.xlsx.writeBuffer())}catch(e
 const lsg=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lss=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 const blank=w=>{const d=JSON.parse(JSON.stringify(DEF));d.asm={nombre:'',tit2:'',recinto:'',ciudad:'',fechas:'',fcarta:''};d.people=w?JSON.parse(JSON.stringify(S.people)):[];return d};
 function evSel(){return `<select onchange="evGo(this.value)" title="Evento">${EV.list.map(e=>`<option value="${e.id}"${e.id==EV.cur?' selected':''}>${esc(e.n)}</option>`).join('')}</select>`}
-function evLoad(id){EV.cur=id;let o=null;try{o=JSON.parse(lsg('asamblea-e-'+id))}catch(e){}S=Object.assign(JSON.parse(JSON.stringify(DEF)),o||{});save();RV=[];render()}
+function evLoad(id){EV.cur=id;let o=null;try{o=JSON.parse(lsg('asamblea-e-'+id))}catch(e){}S=Object.assign(JSON.parse(JSON.stringify(DEF)),o||{});save();RV=[];HDR=null;loadHdr();render()}
 function evGo(id){save();evLoad(id)}
-function evNew(w){const n=prompt('Nombre del nuevo evento:');if(!n)return;save();const id='e'+Date.now().toString(36);EV.list.push({id,n});EV.cur=id;S=blank(w);lg('Evento creado: '+n);save();render()}
+function evNew(w){const n=prompt('Nombre del nuevo evento:');if(!n)return;save();const id='e'+Date.now().toString(36);EV.list.push({id,n});EV.cur=id;S=blank(w);HDR=null;lg('Evento creado: '+n);save();render()}
 function evRen(){const e=EV.list.find(x=>x.id==EV.cur),n=prompt('Nuevo nombre:',e.n);if(!n)return;e.n=n;save();render()}
-function evDel(){if(EV.list.length<2){alert('Debe existir al menos un evento.');return}const e=EV.list.find(x=>x.id==EV.cur);if(!confirm('¿Eliminar el evento "'+e.n+'" con todos sus datos? No se puede deshacer.'))return;try{localStorage.removeItem('asamblea-e-'+e.id)}catch(x){}EV.list=EV.list.filter(x=>x.id!=e.id);evLoad(EV.list[0].id)}
+function evDel(){if(EV.list.length<2){alert('Debe existir al menos un evento.');return}const e=EV.list.find(x=>x.id==EV.cur);if(!confirm('¿Eliminar el evento "'+e.n+'" con todos sus datos? No se puede deshacer.'))return;try{localStorage.removeItem('asamblea-e-'+e.id)}catch(x){}idb('del',0,'hdr-'+e.id);EV.list=EV.list.filter(x=>x.id!=e.id);evLoad(EV.list[0].id)}
 const fnm=s=>String(s).replace(/[^\w\-áéíóúñÁÉÍÓÚÑ ]/g,'').trim()||'evento';
-function expOne(){const e=EV.list.find(x=>x.id==EV.cur);sv('Respaldo - '+fnm(e.n)+'.json',JSON.stringify({evento:e.n,...S},null,1))}
-function expAll(){save();sv('Respaldo - todos los eventos.json',JSON.stringify({all:1,ev:EV.list.map(e=>({n:e.n,d:e.id==EV.cur?S:JSON.parse(lsg('asamblea-e-'+e.id)||'null')||DEF}))}))}
-async function impJ(i){try{const o=JSON.parse(await i.files[0].text()),L=o.all?o.ev:[{n:o.evento||(o.asm&&o.asm.nombre)||'Importado',d:o}];if(!L.length||L.some(x=>!x.d||!x.d.asm||!x.d.people))throw 0;save();let id;L.forEach((x,k)=>{id='e'+Date.now().toString(36)+k;EV.list.push({id,n:x.n});lss('asamblea-e-'+id,JSON.stringify(x.d))});evGo(id)}catch(e){alert('Archivo de respaldo no válido.')}}
+function expOne(){const e=EV.list.find(x=>x.id==EV.cur);sv('Respaldo - '+fnm(e.n)+'.json',JSON.stringify({evento:e.n,...S,hdr:HDR||undefined},null,1))}
+async function expAll(){save();const ev=[];for(const e of EV.list)ev.push({n:e.n,d:e.id==EV.cur?S:JSON.parse(lsg('asamblea-e-'+e.id)||'null')||DEF,h:e.id==EV.cur?HDR:await idb('get',0,'hdr-'+e.id)});sv('Respaldo - todos los eventos.json',JSON.stringify({all:1,ev}))}
+async function impJ(i){try{const o=JSON.parse(await i.files[0].text()),L=o.all?o.ev:[{n:o.evento||(o.asm&&o.asm.nombre)||'Importado',d:o}];if(!L.length||L.some(x=>!x.d||!x.d.asm||!x.d.people))throw 0;save();let id;const hs=[];L.forEach((x,k)=>{id='e'+Date.now().toString(36)+k;EV.list.push({id,n:x.n});const {hdr,...d}=x.d,h=x.h||hdr;lss('asamblea-e-'+id,JSON.stringify(d));if(h)hs.push(idb('set',h,'hdr-'+id))});await Promise.all(hs);evGo(id)}catch(e){alert('Archivo de respaldo no válido.')}}
 let TSRC='';
 const tplUrl=()=>lsg('asamblea-tpl-url')||'plantilla/carta.pdf';
 async function loadTpl(force){const stored=await idb('get');if(lsg('asamblea-tpl-src')=='manual'&&!force&&stored){TPL=stored;TSRC='manual';if(T=='cartas')render();return}
@@ -206,6 +207,21 @@ if(T=='cartas')render()}
 function tplUI(){const m={nube:'cargada desde la dirección indicada',copia:'no se encontró en la nube; se usa la última copia guardada en este navegador',manual:'subida manualmente a este navegador','':'aún no cargada: indica su dirección o súbela manualmente'};
 return `<div class="cd"><b>Plantilla PDF</b> <span class="mu">${m[TSRC]}</span><div class="f" style="margin-top:6px"><label>Dirección de la plantilla (URL o ruta dentro de la app)<input value="${esc(tplUrl())}" onchange="lss('asamblea-tpl-url',this.value.trim())"></label></div><div class="r"><button onclick="loadTpl(1)">Cargar desde la dirección</button><label>Subir manualmente: <input type="file" accept=".pdf" onchange="ldT(this)"></label></div><p class="mu">Si la dirección no responde, se usa la última copia guardada o la que subas. Los 10 campos se llenan por posición (de arriba abajo) y el encabezado se redibuja con los datos de la asamblea. La dirección debe permitir lectura desde el navegador (el mismo repositorio de GitHub Pages o raw.githubusercontent.com); los enlaces de Google Drive o Dropbox normalmente no funcionan.</p></div>`}
 loadTpl();
+/* Fecha y encabezado de las cartas */
+let HDR=null;
+const hoy=()=>{const d=new Date(),p=n=>String(n).padStart(2,'0');return p(d.getDate())+'-'+p(d.getMonth()+1)+'-'+d.getFullYear()};
+const dmy=v=>v?v.split('-').reverse().join('-'):'';
+const fAuto=()=>{const A=S.asm;return A.fauto===undefined?(!A.fcarta||A.fcarta=='26-01-2026'):A.fauto};
+const fcartaTxt=()=>fAuto()?hoy():S.asm.fcarta;
+async function loadHdr(){HDR=(await idb('get',0,'hdr-'+EV.cur))||null;if(T=='asm')render()}
+async function ldH(i){const f=i.files[0];if(!f)return;const u=URL.createObjectURL(f);try{const im=await new Promise((ok,no)=>{const m=new Image();m.onload=()=>ok(m);m.onerror=no;m.src=u}),sc=Math.min(1,2000/im.width),c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);const ct=c.getContext('2d'),png=f.type=='image/png';if(!png){ct.fillStyle='#fff';ct.fillRect(0,0,c.width,c.height)}ct.drawImage(im,0,0,c.width,c.height);HDR=c.toDataURL(png?'image/png':'image/jpeg',.9);await idb('set',HDR,'hdr-'+EV.cur);S.asm.hmode='imagen';lg('Cargó el encabezado de imagen');save();render()}catch(e){alert('No se pudo leer la imagen.')}finally{URL.revokeObjectURL(u)}}
+async function rmH(){await idb('del',0,'hdr-'+EV.cur);HDR=null;lg('Quitó el encabezado de imagen');save();render()}
+const hdrWarn=()=>S.asm.hmode=='imagen'&&!HDR?'<p class="wn">El encabezado está en modo imagen, pero no hay imagen: súbela en la pestaña Asamblea.</p>':'';
+function cartaCfg(){const A=S.asm,auto=fAuto(),m=A.hmode||'texto',mt=(A.fcarta||'').match(/^(\d\d)-(\d\d)-(\d{4})$/),iso=mt?mt[3]+'-'+mt[2]+'-'+mt[1]:'';
+return `<h2 style="margin-top:20px">Fecha y encabezado de las cartas</h2><div class="cd"><b>Fecha de la carta</b><div class="r"><label><input type="checkbox" ${auto?'checked':''} onchange="S.asm.fauto=this.checked;save();render()"> Usar la fecha actual (${hoy()})</label><input type="date" ${auto?'disabled':''} value="${iso}" onchange="S.asm.fcarta=dmy(this.value);save()"></div></div>
+<div class="cd"><b>Encabezado</b><div class="r"><select onchange="S.asm.hmode=this.value;save();render()"><option value="texto"${m=='texto'?' selected':''}>Escrito (título, línea 2 y lugar)</option><option value="imagen"${m=='imagen'?' selected':''}>Imagen subida por mí</option><option value="ninguno"${m=='ninguno'?' selected':''}>Ninguno (la plantilla ya lo trae)</option></select></div>
+${m=='imagen'?`<div class="r"><label>Imagen de encabezado: <input type="file" accept="image/*" onchange="ldH(this)"></label>${HDR?'<button onclick="rmH()">Quitar imagen</button>':''}</div>${HDR?`<img src="${HDR}" alt="Encabezado" style="max-width:100%;max-height:140px;margin-top:8px;border:1px solid var(--bd);border-radius:6px;background:#fff">`:'<p class="wn">Falta subir la imagen.</p>'}<p class="mu">Se coloca arriba de la carta, ajustada al ancho de la página y con un máximo de 128 pt de alto (proporción recomendada cercana a 5:1, por ejemplo 1935 × 390 px). Cada evento guarda su propia imagen. Úsala con una plantilla que no tenga encabezado propio.</p>`:m=='texto'?'<p class="mu">Usa los datos de la pestaña Asamblea, con una plantilla sin encabezado propio.</p>':'<p class="mu">Se respeta el encabezado que ya trae el PDF de la plantilla.</p>'}</div>`}
+loadHdr();
 /* Importar PDF */
 function cards(it){const PV=/^(Anciano|Siervo ministerial|Precursor( regular| auxiliar)?|Publicador( bautizado| no bautizado)?)$/i;
 const LN=a=>{const G=[];a.slice().sort((p,q)=>p.t-q.t).forEach(x=>{let g=G.find(g=>Math.abs(g.t-x.t)<2.5);if(!g)G.push(g={t:x.t,c:[]});g.c.push(x)});return G.map(g=>g.c.sort((p,q)=>p.x-q.x).reduce((s,x,i,r)=>s+(i&&x.x-(r[i-1].x+r[i-1].w)>=1.5?' ':'')+x.s,''))};
@@ -238,12 +254,12 @@ function rvOk(){const seen=new Set(S.people.map(p=>(p.correo||p.nombre).toLowerC
 async function ldT(i){TPL=await i.files[0].arrayBuffer();await idb('set',TPL);lss('asamblea-tpl-src','manual');TSRC='manual';render()}
 async function mk(r){const {PDFDocument,StandardFonts,PDFName,PDFDict}=PDFLib,A=S.asm;const doc=await PDFDocument.load(TPL),form=doc.getForm(),pg=doc.getPage(0);
 const fs=form.getFields().filter(f=>f.acroField.getWidgets().length).sort((a,b)=>b.acroField.getWidgets()[0].getRectangle().y-a.acroField.getWidgets()[0].getRectangle().y);
-const v=[A.fcarta,r.p.nombre,r.puesto,A.ciudad,A.fechas,r.sup?r.sup.nombre:'',r.directo?r.directo.nombre:'',r.sup?r.sup.correo:'','"'+A.nombre+'"',''];
+const v=[fcartaTxt(),r.p.nombre,r.puesto,A.ciudad,A.fechas,r.sup?r.sup.nombre:'',r.directo?r.directo.nombre:'',r.sup?r.sup.correo:'','"'+A.nombre+'"',''];
 const fb=await doc.embedFont(StandardFonts.TimesRomanBold),fr=await doc.embedFont(StandardFonts.TimesRoman);
 fs.forEach((f,i)=>{if(f.setText&&v[i]!==undefined)f.setText(v[i])});form.updateFieldAppearances(fb);
-const an=pg.node.Annots();if(an)for(let i=an.size()-1;i>=0;i--){const a=an.lookup(i,PDFDict);if(a.get(PDFName.of('Subtype'))===PDFName.of('FreeText'))an.remove(i)}
+const hm=A.hmode||'texto',an=pg.node.Annots();if(hm!='ninguno'&&an)for(let i=an.size()-1;i>=0;i--){const a=an.lookup(i,PDFDict);if(a.get(PDFName.of('Subtype'))===PDFName.of('FreeText'))an.remove(i)}
 const c=(t,y,s,f)=>pg.drawText(t,{x:(612-f.widthOfTextAtSize(t,s))/2,y,size:s,font:f});
-c('ASAMBLEA REGIONAL DE LOS TESTIGOS DE JEHOVÁ',722,17,fb);c(A.tit2,704,12,fr);c(A.recinto,689,9,fr);return doc.save()}
+if(hm=='texto'){c('ASAMBLEA REGIONAL DE LOS TESTIGOS DE JEHOVÁ',722,17,fb);c(A.tit2,704,12,fr);c(A.recinto,689,9,fr)}else if(hm=='imagen'&&HDR){const im=HDR.startsWith('data:image/png')?await doc.embedPng(HDR):await doc.embedJpg(HDR),sc=Math.min(612/im.width,128/im.height),w=im.width*sc,h=im.height*sc;pg.drawImage(im,{x:(612-w)/2,y:792-h,width:w,height:h})}return doc.save()}
 const fn=r=>('Carta - '+r.p.nombre+' - '+r.puesto).replace(/[^\wáéíóúñÁÉÍÓÚÑ \-]/g,'')+'.pdf';
 async function one(j){const r=crs()[j];try{await sv(fn(r),await mk(r))}catch(e){alert('Error al generar la carta: '+e.message)}}
 async function zipAll(){try{const z=new JSZip();for(const r of crs())z.file(fn(r),await mk(r));await sv('Cartas de invitación.zip',await z.generateAsync({type:'uint8array'}))}catch(e){alert('Error al generar las cartas: '+e.message)}}
