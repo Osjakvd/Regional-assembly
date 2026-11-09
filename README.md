@@ -22,6 +22,11 @@ Acento vino con modo claro y oscuro automático según el dispositivo (no hay in
 ## Directorio: sin participación y filtros
 En *Directorio* marca la casilla "Sin particip." para quien no acepta o no puede apoyar: deja de aparecer en los selectores de asignación y, si tenía asignación, se le quita. El filtro permite ver: todos, libres, asignados, sin participación, y por área, por rol o por departamento.
 
+## Registro de cambios y estado de cartas
+- *Registro* guarda por evento quién asignó o quitó a quién, presencia de departamentos, altas y bajas del directorio, importaciones y cambios de estado de cartas. En *Asamblea → Tu nombre* escribe el nombre que debe aparecer en el registro. Se puede exportar a CSV y se incluye en los respaldos.
+- En *Cartas* cada invitación tiene estado: Pendiente, Enviada, Aceptó o Declinó. Se puede filtrar por área y estado, marcar las pendientes visibles como enviadas y exportar el estado a CSV. Si marcas "Declinó", la app ofrece quitar la asignación y marcar a la persona como sin participación. Si cambia la persona asignada a un puesto, el estado vuelve a Pendiente.
+- Un evento nuevo siempre empieza vacío; su directorio se importa desde un CSV o PDF nuevo.
+
 ## Plantilla de la carta (PDF)
 La app busca la plantilla en `plantilla/carta.pdf` (dentro del mismo sitio). Para usarla desde la nube:
 1. Deja los campos de tu PDF **vacíos** (sin nombres ni correos de personas).
@@ -39,7 +44,7 @@ Los datos NO se sincronizan: cada navegador tiene los suyos. Para pasarlos de un
 
 ## Actualizar la app
 1. Reemplaza `index.html` en el repositorio.
-2. Cambia `VERSION` en `sw.js` (por ejemplo `asamblea-v4`) para que los dispositivos descarguen la nueva versión.
+2. Cambia `VERSION` en `sw.js` (por ejemplo `asamblea-v1.5`) para que los dispositivos descarguen la nueva versión.
 
 ## Funciona sin internet
 Las librerías (PDF, ZIP, Excel, lectura de PDF) están incluidas en `lib/`, así que la app funciona sin conexión después de la primera visita.
