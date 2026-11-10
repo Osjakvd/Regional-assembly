@@ -35,7 +35,7 @@ Para publicar y mantener la aplicación en GitHub Pages, consulta [`MANTENIMIENT
 1. **Asamblea:** captura el nombre, las fechas, el lugar y el código de los archivos. Elige el encabezado de las cartas y, si quieres, escribe *Tu nombre* para el registro de cambios.
 2. **Directorio:** importa el CSV o el PDF de contactos, o agrega personas a mano. Marca como *sin participación* a quien no acepte o no pueda apoyar.
 3. **Asignación:** en cada una de las 3 áreas, elige quién es superintendente y auxiliares de cada departamento. Marca los departamentos que sí estarán presentes.
-4. **Organigrama y Directorios:** revisa el resultado e imprímelo o guárdalo como PDF.
+4. **Organigrama y Directorios:** revisa el resultado y descárgalo en PDF.
 5. **Dir. dptos.:** descarga el directorio de departamentos en PDF (una hoja) o en Excel.
 6. **Cartas:** carga la plantilla, descarga las cartas por persona o todas en un ZIP y lleva el control de su estado (pendiente, enviada, aceptó, declinó).
 7. **Respaldos:** exporta un respaldo del evento con frecuencia.
@@ -61,18 +61,27 @@ Cada evento (por ejemplo, cada asamblea) tiene su propio directorio, asignacione
 - Los duplicados (mismo correo o nombre) se omiten.
 - **Búsqueda** por nombre, apellido, congregación o correo; ignora acentos y mayúsculas.
 - **Filtros:** todos, libres, asignados, sin participación, y por área, por rol o por departamento.
+- **Descargar PDF:** tabla en hoja carta horizontal con el filtro y la búsqueda que tengas activos (Nombre, Congregación, Teléfono, Correo y Asignación). Marca a quienes no participan.
 - **Sin participación:** casilla para quien no acepta o no puede apoyar. Deja de aparecer en los selectores y, si tenía asignación, se le quita (la aplicación pide confirmación).
 
 ### Asignación
 - Una pestaña por área. Cada departamento tiene casilla de *presente*; por defecto están apagados los opcionales (Interpretación táctil, Instalación, Transporte y Materiales).
 - Cada departamento tiene superintendente y hasta 3 auxiliares (Seguridad usa "Coordinador"; Audio y Video tiene Auxiliar Audio, Video y Plataforma).
-- Los selectores tienen **buscador** y solo muestran personas libres: **una persona no puede tener dos asignaciones**.
+- Cada puesto tiene **un solo campo con sugerencias**: al tocarlo se abre la lista y al escribir se filtra por **nombres y apellidos** (no por congregación; ignora acentos y mayúsculas y acepta varias palabras). Funciona igual en iPad, Android y computadora.
+  - Toca una sugerencia para asignar. Si ya hay alguien, aparece al inicio "Quitar asignación". Con teclado: flechas, Enter para elegir y Esc para cerrar.
+  - La lista solo muestra personas libres: **una persona no puede tener dos asignaciones**. Si hay más de 40 coincidencias, se muestran las primeras y hay que seguir escribiendo.
 - Un departamento que se marca como no presente no cuenta como asignación.
 
-### Organigrama / Directorios
-Vistas listas para imprimir (usa *Imprimir / PDF* o `Ctrl + P`). Al imprimir siempre se usan colores claros.
-- **Organigrama:** nombre de la asamblea arriba, las 3 áreas y sus departamentos.
-- **Directorios:** una tabla por área con asignación, nombre, congregación, teléfono y correo.
+### Organigrama
+- **Descargar PDF:** organigrama con nombres completos en **una sola hoja**. El tamaño de letra se ajusta solo; el selector *Hoja* permite elegir **automática** (carta y, si no cabe con letra legible, oficio/legal), **carta** u **oficio (legal)**.
+- *Imprimir* usa el diálogo del navegador (en iPad conviene el PDF).
+
+### Directorios (por área)
+- **Descargar PDF** con diseño formal ya incluido en la aplicación, sin pedir plantilla: encabezado de la asamblea, franja de color por área, departamentos destacados, filas alternadas, bordes marcados, encabezado de columnas repetido en cada página y pie con "Página X de Y" y fecha de generación. Hoja carta vertical.
+- *Imprimir* usa el diálogo del navegador.
+
+### Imagen de encabezado en los PDF (opcional)
+Si el evento tiene una imagen de encabezado cargada (ver Cartas), aparece la casilla *Usar la imagen de encabezado en el PDF* en el directorio general, el organigrama y los directorios por área. Viene apagada por defecto; al activarla, la imagen sustituye al encabezado escrito, como hoja membretada.
 
 ### Dir. dptos.
 Directorio de departamentos con el formato de una hoja: comité, presidente y tabla de departamentos con superintendente y Auxiliar A, B y C (nombre, celular y congregación completos). Se descarga en **PDF** (principal) y en **Excel**. No se incluyen los departamentos que no estén presentes.
@@ -143,6 +152,8 @@ Usa "Escrito" o "Imagen" con plantillas **sin** encabezado propio, para que no s
 **La importación de PDF no reconoce mi archivo.** Funciona con PDF de texto (no escaneados) con formato de tarjetas o de filas con teléfono o correo. Si falla, exporta a CSV.
 
 **Un nombre salió mal en el PDF.** Los PDF que genera la aplicación usan letra estándar (Helvetica y Times) y omiten símbolos fuera del alfabeto latino.
+
+**Las sugerencias no aparecen al escribir.** Toca el campo del puesto; la lista se abre al enfocarlo. Si no muestra a nadie, esa persona ya tiene otra asignación o está marcada como sin participación.
 
 **Las descargas piden confirmación o no se guardan.** Revisa que el navegador permita descargas del sitio.
 
