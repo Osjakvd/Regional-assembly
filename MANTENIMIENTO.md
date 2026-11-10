@@ -43,7 +43,7 @@ Las rutas son relativas, así que funciona dentro de la subcarpeta del repositor
 ## Actualizar la aplicación
 
 1. Reemplaza en el repositorio los archivos que cambiaron (normalmente `index.html`).
-2. **Cambia `VERSION` en `sw.js`** (por ejemplo, de `asamblea-v1.7` a `asamblea-v1.8`). Sin este cambio, los dispositivos siguen usando la versión guardada en caché.
+2. **Cambia `VERSION` en `sw.js`** (por ejemplo, de `asamblea-v1.8` a `asamblea-v1.9`). Sin este cambio, los dispositivos siguen usando la versión guardada en caché.
 3. Los dispositivos descargan la nueva versión al abrir la aplicación con conexión; puede requerir cerrarla y abrirla una segunda vez.
 
 Si agregas o quitas archivos de `lib/` o `icons/`, actualiza también la lista `FILES` de `sw.js`.
@@ -87,6 +87,7 @@ Los datos de los usuarios no se pierden al actualizar la aplicación: se guardan
 
 | Versión | Cambios |
 |---|---|
+| 1.8 | Campo único con sugerencias para asignar (compatible con iPad); PDF del directorio general, de los directorios por área (diseño formal) y del organigrama en una hoja (carta u oficio); imagen de encabezado opcional en los PDF |
 | 1.7 | Columna "Asignación" también en la tabla de cartas y en el CSV de estado |
 | 1.6 | Nombre de archivo `AAAAMM CÓDIGO Asignación - Nombre`; presidente en la pestaña Asamblea; "Asignación" en directorios |
 | 1.5 | Encabezado de carta como imagen, fecha actual por defecto |
