@@ -139,7 +139,7 @@ Todas las descargas usan el mismo formato: `AAAAMM CÓDIGO Nombre.extensión`. E
 | Descarga | Ejemplo |
 |---|---|
 | Carta | `202611 AR27 Auxiliar de Limpieza - Ana Pérez.pdf` |
-| ZIP de cartas | `202611 AR27 Cartas de invitación.zip` |
+| ZIP de cartas | `202611 AR27 Cartas de invitación.zip`; con un área filtrada se agrega al nombre, por ejemplo `202611 AR27 Superintendente del programa Cartas de invitación.zip` |
 | Estado de cartas | `202611 AR27 Estado de cartas.csv` |
 | Directorio general | `202611 AR27 Directorio general.pdf` |
 | Directorios por área | `202611 AR27 Directorios por área.pdf` |
