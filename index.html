@@ -230,10 +230,11 @@ ${m=='imagen'?`<div class="r"><label>Imagen de encabezado: <input type="file" ac
 loadHdr();
 /* Campo único con sugerencias */
 let CB=null;
-function sel(k){const p=P(S.as[k]);return `<div class="cb"><input class="cbi" data-k="${k}" value="${esc(p?p.nombre:'')}" placeholder="— sin asignar — (escribe para buscar)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onfocus="cbOpen(this)" oninput="cbList(this)" onkeydown="cbKey(event,this)"><div class="cbl" hidden onclick="cbClick(event)"></div></div>`}
+const cbTxt=p=>p?p.nombre+(p.cong?' · '+p.cong:''):'';
+function sel(k){const p=P(S.as[k]);return `<div class="cb"><input class="cbi" data-k="${k}" value="${esc(cbTxt(p))}" placeholder="— sin asignar — (escribe para buscar)" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" onfocus="cbOpen(this)" oninput="cbList(this)" onkeydown="cbKey(event,this)"><div class="cbl" hidden onclick="cbClick(event)"></div></div>`}
 function cbCands(k,q){const u=used(),cur=S.as[k],t=nz(q).split(/\s+/).filter(Boolean);const a=S.people.filter(p=>p.id==cur||(!p.no&&!u.has(p.id))).filter(p=>t.every(w=>nz(p.nombre).includes(w))).sort((x,y)=>x.nombre.localeCompare(y.nombre));return {items:a.slice(0,40),more:Math.max(0,a.length-40)}}
 function cbOpen(el){try{el.select();el.setSelectionRange(0,el.value.length)}catch(e){}cbList(el,true);setTimeout(()=>{try{el.scrollIntoView({block:'center',behavior:'smooth'})}catch(e){}},300)}
-function cbList(el,all){const k=el.dataset.k,box=el.nextElementSibling,c=cbCands(k,all?'':el.value);let h='';if(S.as[k])h+='<div class="cbo" data-id="">✕ Quitar asignación</div>';
+function cbList(el,all){const k=el.dataset.k,box=el.nextElementSibling,c=cbCands(k,all?'':el.value.split('·')[0]);let h='';if(S.as[k])h+='<div class="cbo" data-id="">✕ Quitar asignación</div>';
 h+=c.items.map(p=>`<div class="cbo" data-id="${p.id}">${esc(p.nombre)}${p.cong?' <small>· '+esc(p.cong)+'</small>':''}</div>`).join('');
 if(!c.items.length)h+='<div class="cbo mu">Sin coincidencias</div>';if(c.more)h+=`<div class="cbo mu">Hay ${c.more} más: sigue escribiendo…</div>`;
 box.innerHTML=h;box.hidden=false;CB={k,i:-1}}
@@ -242,7 +243,7 @@ function cbKey(e,el){const box=el.nextElementSibling,it=[...box.querySelectorAll
 if(e.key=='Escape'){cbCloseAll();el.blur();return}
 if(e.key=='ArrowDown'||e.key=='ArrowUp'){e.preventDefault();if(!it.length)return;CB.i=e.key=='ArrowDown'?(CB.i+1)%it.length:(CB.i<=0?it.length-1:CB.i-1);it.forEach((x,j)=>x.classList.toggle('on',j==CB.i));it[CB.i].scrollIntoView({block:'nearest'});return}
 if(e.key=='Enter'){e.preventDefault();let o=it[CB.i];if(!o&&el.value.trim())o=it.find(x=>x.dataset.id);if(o)setA(el.dataset.k,o.dataset.id)}}
-function cbCloseAll(){document.querySelectorAll('.cb').forEach(c=>{c.querySelector('.cbl').hidden=true;const i=c.querySelector('.cbi');i.value=(P(S.as[i.dataset.k])||{}).nombre||''})}
+function cbCloseAll(){document.querySelectorAll('.cb').forEach(c=>{c.querySelector('.cbl').hidden=true;const i=c.querySelector('.cbi');i.value=cbTxt(P(S.as[i.dataset.k]))})}
 if(document.addEventListener)document.addEventListener('pointerdown',e=>{if(!(e.target.closest&&e.target.closest('.cb')))cbCloseAll()});
 /* PDF: tablas y organigrama */
 const clx=s=>String(s==null?'':s).replace(/[^\u0020-\u007E\u00A0-\u00FF]/g,'');
