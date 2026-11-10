@@ -340,7 +340,8 @@ if(hm=='texto'){c('ASAMBLEA REGIONAL DE LOS TESTIGOS DE JEHOVÁ',722,17,fb);c(A.
 const fym=()=>{const m=(fcartaTxt()||'').match(/^(\d\d)-(\d\d)-(\d{4})$/);if(m)return m[3]+m[2];const d=new Date();return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')};
 const fn=r=>[fym(),(S.asm.codigo||'').trim(),r.puesto+' - '+r.p.nombre].filter(Boolean).join(' ').replace(/[\\/:*?"<>|]/g,'').replace(/\s+/g,' ').trim()+'.pdf';
 async function one(j){const r=crs()[j];try{await sv(fn(r),await mk(r))}catch(e){alert('Error al generar la carta: '+e.message)}}
-async function zipAll(){try{const z=new JSZip();const us={};for(const r of crs()){let n=fn(r);us[n]=(us[n]||0)+1;if(us[n]>1)n=n.replace(/\.pdf$/,' ('+us[n]+').pdf');z.file(n,await mk(r))}await sv(pfn('Cartas de invitación','zip'),await z.generateAsync({type:'uint8array'}))}catch(e){alert('Error al generar las cartas: '+e.message)}}
+const zipName=()=>pfn((CF=='all'?'':AREAS.find(a=>a.id==CF).h+' ')+'Cartas de invitación','zip');
+async function zipAll(){try{const z=new JSZip();const us={};for(const r of crs()){let n=fn(r);us[n]=(us[n]||0)+1;if(us[n]>1)n=n.replace(/\.pdf$/,' ('+us[n]+').pdf');z.file(n,await mk(r))}await sv(zipName(),await z.generateAsync({type:'uint8array'}))}catch(e){alert('Error al generar las cartas: '+e.message)}}
 render();
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script></body></html>
