@@ -132,6 +132,23 @@ Usa "Escrito" o "Imagen" con plantillas **sin** encabezado propio, para que no s
 
 ---
 
+## Nombre de los archivos descargados
+
+Todas las descargas usan el mismo formato: `AAAAMM CÓDIGO Nombre.extensión`. El año y mes salen de la fecha de la carta (la actual o la que elijas en *Asamblea*) y el código se escribe en *Asamblea → Código para nombrar archivos*; si se deja vacío, se omite.
+
+| Descarga | Ejemplo |
+|---|---|
+| Carta | `202611 AR27 Auxiliar de Limpieza - Ana Pérez.pdf` |
+| ZIP de cartas | `202611 AR27 Cartas de invitación.zip` |
+| Estado de cartas | `202611 AR27 Estado de cartas.csv` |
+| Directorio general | `202611 AR27 Directorio general.pdf` |
+| Directorios por área | `202611 AR27 Directorios por área.pdf` |
+| Organigrama | `202611 AR27 Organigrama.pdf` |
+| Directorio de departamentos | `202611 AR27 Directorio de departamentos.pdf` y `.xlsx` |
+| Registro de cambios | `202611 AR27 Registro de cambios.csv` |
+| Respaldo de un evento | `202611 AR27 Respaldo - Nombre del evento.json` |
+| Respaldo de todos los eventos | `202611 Respaldo - todos los eventos.json` (sin código, porque abarca varios eventos) |
+
 ## Respaldos
 
 - **Exportar este evento** genera un archivo JSON con el nombre del evento (directorio, asignaciones, registro, estados y encabezado de imagen). **Exportar todos** genera uno con todos los eventos.
