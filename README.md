@@ -68,6 +68,7 @@ Cada evento (por ejemplo, cada asamblea) tiene su propio directorio, asignacione
 - Una pestaña por área. Cada departamento tiene casilla de *presente*; por defecto están apagados los opcionales (Interpretación táctil, Instalación, Transporte y Materiales).
 - Cada departamento tiene superintendente y hasta 3 auxiliares (Seguridad usa "Coordinador"; Audio y Video tiene Auxiliar Audio, Video y Plataforma).
 - Cada puesto tiene **un solo campo con sugerencias**: al tocarlo se abre la lista y al escribir se filtra por **nombres y apellidos** (no por congregación; ignora acentos y mayúsculas y acepta varias palabras). Funciona igual en iPad, Android y computadora.
+  - Cada sugerencia muestra el nombre y, en gris, la congregación (la congregación no se usa para buscar). Una vez asignada la persona, el campo muestra "Nombre · Congregación".
   - Toca una sugerencia para asignar. Si ya hay alguien, aparece al inicio "Quitar asignación". Con teclado: flechas, Enter para elegir y Esc para cerrar.
   - La lista solo muestra personas libres: **una persona no puede tener dos asignaciones**. Si hay más de 40 coincidencias, se muestran las primeras y hay que seguir escribiendo.
 - Un departamento que se marca como no presente no cuenta como asignación.
