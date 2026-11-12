@@ -201,14 +201,20 @@ Todas las descargas usan el mismo formato: `AAAAMM CÓDIGO Nombre.extensión`. E
 | Registro de cambios | `202611 AR27 Registro de cambios.csv` |
 | Respaldo de un evento | `202611 AR27 Respaldo - Nombre del evento.json` |
 | Respaldo de todos los eventos | `202611 Respaldo - todos los eventos.json` (sin código, porque abarca varios eventos) |
-
 ## Privacidad
 
-- La aplicación no envía datos a ningún servidor; todo se procesa en el dispositivo.
+- **En este dispositivo** la aplicación no envía datos a ningún servidor; todo se procesa en el dispositivo.
+- **En la nube** el directorio, las asignaciones, el registro y los correos de las cuentas se guardan en el proyecto de Supabase del mantenedor. Solo los ven los miembros del evento y el administrador general; el directorio completo (con teléfonos y correos) es visible para todo el equipo del evento.
 - El directorio contiene datos personales. **No subas al repositorio** el CSV o PDF del directorio, los respaldos ni las cartas generadas.
 - La plantilla `plantilla/carta.pdf` debe tener los campos vacíos.
 
 ## Preguntas frecuentes
+
+**No me llega el correo de confirmación o de acceso.** Revisa *spam*. Si aparece «demasiados correos», espera unos minutos. Puedes entrar con contraseña una vez confirmada tu cuenta.
+
+**Me salió «No se guardó el cambio».** Alguien más cambió lo mismo a la vez o tu rol no permite ese cambio; la pantalla se actualiza con lo que hay en el servidor. Si no había conexión, vuelve a intentarlo cuando la recuperes.
+
+**Abrí un enlace de invitación y no pasó nada.** Inicia sesión o crea tu cuenta en la pestaña *Cuenta*: al terminar quedas unido al evento. Si dice que caducó o ya se usó, pide otro al administrador.
 
 **¿Puedo usarla sin internet?** Sí, después de abrirla una vez con conexión. Cargar la plantilla desde una dirección externa sí requiere internet; si no hay, se usa la última copia guardada.
 

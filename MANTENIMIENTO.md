@@ -47,10 +47,10 @@ Las rutas son relativas, así que funciona dentro de la subcarpeta del repositor
 ## Actualizar la aplicación
 
 1. Reemplaza en el repositorio los archivos que cambiaron (normalmente `index.html`).
-2. **Cambia `VERSION` en `sw.js`** (por ejemplo, de `asamblea-v1.11` a `asamblea-v1.12`). Sin este cambio, los dispositivos siguen usando la versión guardada en caché.
+2. **Cambia `VERSION` en `sw.js`** (por ejemplo, de `asamblea-v2.0` a `asamblea-v2.1`). Sin este cambio, los dispositivos siguen usando la versión guardada en caché.
 3. Los dispositivos descargan la nueva versión al abrir la aplicación con conexión; puede requerir cerrarla y abrirla una segunda vez.
 
-Si agregas o quitas archivos de `lib/` o `icons/`, actualiza también la lista `FILES` de `sw.js`.
+Si agregas o quitas archivos de `lib/` o `icons/` (o `cloud.js`), actualiza también la lista `FILES` de `sw.js`.
 
 Los datos de los usuarios no se pierden al actualizar la aplicación: se guardan en el navegador (localStorage e IndexedDB), no en los archivos del sitio.
 
@@ -86,8 +86,6 @@ La app es una página estática; la parte colaborativa usa un proyecto de **Supa
 - **Respaldo de la base:** el plan gratuito no incluye respaldos descargables automáticos; exporta periódicamente cada evento con *Exportar este evento* y, si quieres, un volcado desde el panel de Supabase.
 - **Cambios de esquema:** se hacen con parches SQL que no borran datos (ver `supabase/`); después sube la versión de `sw.js` si también cambió la app.
 
-
-
 ## Datos y privacidad
 
 - **No subas al repositorio** directorios reales (CSV/PDF), respaldos JSON ni cartas generadas. El repositorio es público.
@@ -100,7 +98,9 @@ La app es una página estática; la parte colaborativa usa un proyecto de **Supa
 |---|---|
 | Eventos (directorio, asignaciones, registro, estados) | `localStorage` del navegador |
 | Plantilla PDF en caché e imagen de encabezado | `IndexedDB` del navegador |
-| Nombre del usuario y dirección de la plantilla | `localStorage` |
+| Nombre del usuario (modo local) y dirección de la plantilla | `localStorage` |
+| Sesión de la cuenta, último evento abierto, invitación pendiente | `localStorage` |
+| Eventos en la nube (directorio, asignaciones, cartas, registro, equipo) | Supabase (PostgreSQL); el navegador solo guarda una copia en memoria mientras está abierto |
 
 `localStorage` suele permitir unos 5 MB por sitio. Con directorios de cientos de personas hay margen, pero conviene exportar respaldos.
 
@@ -111,6 +111,10 @@ La app es una página estática; la parte colaborativa usa un proyecto de **Supa
 - **Las librerías no cargan:** confirma que la carpeta `lib/` se subió completa (incluido `pdf.worker.min.js`).
 - **No se instala como aplicación:** debe abrirse con `https://`; en iPhone usa Safari → *Compartir → Agregar a pantalla de inicio*.
 - **La plantilla no se carga desde la nube:** revisa la dirección en la pestaña *Cartas* y que el archivo sea un PDF accesible públicamente; si no, súbela manualmente.
+- **No puedo entrar / el enlace del correo no regresa a la app:** revisa *Authentication → URL Configuration* (Site URL y Redirect URLs) y que el correo se abra en el mismo dispositivo.
+- **No llegan los correos:** revisa la configuración SMTP, los límites de envío y la carpeta *spam*.
+- **«Sin conexión con el servidor» / se pausó el proyecto:** en el panel de Supabase, *Restore project*; luego confirma que el aviso periódico (`keepalive`) esté activo.
+- **Un cambio se rechaza con «No tienes permiso»:** el rol de la cuenta no lo permite (por ejemplo, un editor fuera de su área); es el comportamiento esperado.
 - **Se borraron los datos:** limpiar los datos del navegador o desinstalar la aplicación los elimina. Restáuralos importando un respaldo.
 
 ## Historial de versiones
@@ -119,7 +123,7 @@ La app es una página estática; la parte colaborativa usa un proyecto de **Supa
 |---|---|
 | 2.0 | **Versión colaborativa:** cuentas, eventos en la nube con equipo de 6 (2 por área), roles (administrador general, administrador de evento, editor de área), invitaciones por enlace, sincronización en tiempo real, solicitud y aprobación para ver cartas de otras áreas, copia de un evento local a la nube. Los eventos locales siguen funcionando igual |
 | 1.11 | El ZIP de cartas incluye en el nombre el área filtrada |
-| 1.10 | Todas las descargas usan el formato `AAAAMM CÓDIGO Nombre` |
+| 1.10 | Todas las descargas usan el formato `AAAAMM CÓDIGO Nombre` |																	  
 | 1.9 | El campo de asignación muestra "Nombre · Congregación" una vez seleccionada la persona |
 | 1.8 | Campo único con sugerencias para asignar (compatible con iPad); PDF del directorio general, de los directorios por área (diseño formal) y del organigrama en una hoja (carta u oficio); imagen de encabezado opcional en los PDF |
 | 1.7 | Columna "Asignación" también en la tabla de cartas y en el CSV de estado |
