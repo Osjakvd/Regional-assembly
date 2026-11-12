@@ -2,10 +2,9 @@
 
 Aplicación web (PWA) para organizar una asamblea regional: directorio de personas, asignación por áreas y departamentos, organigrama, directorios imprimibles y cartas de invitación en PDF.
 
-Funciona en el navegador, se puede instalar en el celular o la computadora y **trabaja sin internet** después de la primera visita. Tiene dos formas de trabajo:
+Funciona en el navegador, se puede instalar en el celular o la computadora y **trabaja sin internet** después de la primera visita. No necesita servidor: los datos se guardan en el propio dispositivo.
 
-- **En este dispositivo** (sin cuenta): los datos se guardan en el propio dispositivo y no se sincronizan. Para pasarlos de uno a otro se usan los respaldos (ver [Respaldos](#respaldos)).
-- **En la nube** (con cuenta): varias personas de un equipo trabajan en el mismo evento y ven los cambios de los demás al instante (ver [Eventos en la nube](#eventos-en-la-nube-colaborativo)).
+> Los datos **no se sincronizan** entre dispositivos. Para pasarlos de uno a otro se usan los respaldos (ver [Respaldos](#respaldos)). Una versión colaborativa está en planeación.
 
 ---
 
@@ -185,20 +184,30 @@ Un editor ve solo las cartas de su área. Si necesita ver las demás (solo lectu
 - **Importar** agrega el respaldo como un evento nuevo, sin sobrescribir el actual.
 - Los datos viven en el navegador: **borrar los datos del navegador o desinstalar la aplicación los elimina**. Haz respaldos periódicos y guarda los archivos fuera del dispositivo.
 
+## Nombre de los archivos descargados
+
+Todas las descargas usan el mismo formato: `AAAAMM CÓDIGO Nombre.extensión`. El año y mes salen de la fecha de la carta (la actual o la que elijas en *Asamblea*) y el código se escribe en *Asamblea → Código para nombrar archivos*; si se deja vacío, se omite.
+
+| Descarga | Ejemplo |
+|---|---|
+| Carta | `202611 AR27 Auxiliar de Limpieza - Ana Pérez.pdf` |
+| ZIP de cartas | `202611 AR27 Cartas de invitación.zip`; con un área filtrada se agrega al nombre, por ejemplo `202611 AR27 Superintendente del programa Cartas de invitación.zip` |
+| Estado de cartas | `202611 AR27 Estado de cartas.csv` |
+| Directorio general | `202611 AR27 Directorio general.pdf` |
+| Directorios por área | `202611 AR27 Directorios por área.pdf` |
+| Organigrama | `202611 AR27 Organigrama.pdf` |
+| Directorio de departamentos | `202611 AR27 Directorio de departamentos.pdf` y `.xlsx` |
+| Registro de cambios | `202611 AR27 Registro de cambios.csv` |
+| Respaldo de un evento | `202611 AR27 Respaldo - Nombre del evento.json` |
+| Respaldo de todos los eventos | `202611 Respaldo - todos los eventos.json` (sin código, porque abarca varios eventos) |
+
 ## Privacidad
 
-- **En este dispositivo** la aplicación no envía datos a ningún servidor; todo se procesa en el dispositivo.
-- **En la nube** el directorio, las asignaciones, el registro y los correos de las cuentas se guardan en el proyecto de Supabase del mantenedor. Solo los ven los miembros del evento y el administrador general; el directorio completo (con teléfonos y correos) es visible para todo el equipo del evento.
+- La aplicación no envía datos a ningún servidor; todo se procesa en el dispositivo.
 - El directorio contiene datos personales. **No subas al repositorio** el CSV o PDF del directorio, los respaldos ni las cartas generadas.
 - La plantilla `plantilla/carta.pdf` debe tener los campos vacíos.
 
 ## Preguntas frecuentes
-
-**No me llega el correo de confirmación o de acceso.** Revisa *spam*. Si aparece «demasiados correos», espera unos minutos. Puedes entrar con contraseña una vez confirmada tu cuenta.
-
-**Me salió «No se guardó el cambio».** Alguien más cambió lo mismo a la vez o tu rol no permite ese cambio; la pantalla se actualiza con lo que hay en el servidor. Si no había conexión, vuelve a intentarlo cuando la recuperes.
-
-**Abrí un enlace de invitación y no pasó nada.** Inicia sesión o crea tu cuenta en la pestaña *Cuenta*: al terminar quedas unido al evento. Si dice que caducó o ya se usó, pide otro al administrador.
 
 **¿Puedo usarla sin internet?** Sí, después de abrirla una vez con conexión. Cargar la plantilla desde una dirección externa sí requiere internet; si no hay, se usa la última copia guardada.
 
