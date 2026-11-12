@@ -1,0 +1,17 @@
+# Evita que el proyecto gratuito de Supabase se pause por inactividad.
+# Llama a la función pública ping() (una consulta real a la base). La llave sb_publishable es pública.
+name: supabase-keepalive
+on:
+  schedule:
+    - cron: "17 14 * * 1,4"   # lunes y jueves
+  workflow_dispatch: {}
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping a Supabase
+        run: |
+          curl --fail --silent --show-error -X POST \
+            "https://ozgauxhdssezcvvbumjb.supabase.co/rest/v1/rpc/ping" \
+            -H "apikey: sb_publishable_mK9v4mkUvJQtThueDyQ5Mw_Xun0dsrP" \
+            -H "Content-Type: application/json" -d '{}'
