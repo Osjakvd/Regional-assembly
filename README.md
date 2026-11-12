@@ -2,9 +2,10 @@
 
 Aplicación web (PWA) para organizar una asamblea regional: directorio de personas, asignación por áreas y departamentos, organigrama, directorios imprimibles y cartas de invitación en PDF.
 
-Funciona en el navegador, se puede instalar en el celular o la computadora y **trabaja sin internet** después de la primera visita. No necesita servidor: los datos se guardan en el propio dispositivo.
+Funciona en el navegador, se puede instalar en el celular o la computadora y **trabaja sin internet** después de la primera visita. Tiene dos formas de trabajo:
 
-> Los datos **no se sincronizan** entre dispositivos. Para pasarlos de uno a otro se usan los respaldos (ver [Respaldos](#respaldos)). Una versión colaborativa está en planeación.
+- **En este dispositivo** (sin cuenta): los datos se guardan en el propio dispositivo y no se sincronizan. Para pasarlos de uno a otro se usan los respaldos (ver [Respaldos](#respaldos)).
+- **En la nube** (con cuenta): varias personas de un equipo trabajan en el mismo evento y ven los cambios de los demás al instante (ver [Eventos en la nube](#eventos-en-la-nube-colaborativo)).
 
 ---
 
@@ -14,6 +15,7 @@ Funciona en el navegador, se puede instalar en el celular o la computadora y **t
 - [Guía de uso paso a paso](#guía-de-uso-paso-a-paso)
 - [Qué hace cada pestaña](#qué-hace-cada-pestaña)
 - [Cartas de invitación](#cartas-de-invitación)
+- [Eventos en la nube (colaborativo)](#eventos-en-la-nube-colaborativo)
 - [Respaldos](#respaldos)
 - [Privacidad](#privacidad)
 - [Preguntas frecuentes](#preguntas-frecuentes)
@@ -132,22 +134,50 @@ Usa "Escrito" o "Imagen" con plantillas **sin** encabezado propio, para que no s
 
 ---
 
-## Nombre de los archivos descargados
+## Eventos en la nube (colaborativo)
 
-Todas las descargas usan el mismo formato: `AAAAMM CÓDIGO Nombre.extensión`. El año y mes salen de la fecha de la carta (la actual o la que elijas en *Asamblea*) y el código se escribe en *Asamblea → Código para nombrar archivos*; si se deja vacío, se omite.
+Con una cuenta, un evento puede compartirse con un equipo de hasta **6 personas: 2 por área** (Coordinador del Comité, Superintendente del programa y Superintendente de Alojamiento). Los eventos «En este dispositivo» siguen funcionando igual que antes, sin cuenta y sin internet.
 
-| Descarga | Ejemplo |
+### Roles
+
+| Rol | Qué puede hacer |
 |---|---|
-| Carta | `202611 AR27 Auxiliar de Limpieza - Ana Pérez.pdf` |
-| ZIP de cartas | `202611 AR27 Cartas de invitación.zip`; con un área filtrada se agrega al nombre, por ejemplo `202611 AR27 Superintendente del programa Cartas de invitación.zip` |
-| Estado de cartas | `202611 AR27 Estado de cartas.csv` |
-| Directorio general | `202611 AR27 Directorio general.pdf` |
-| Directorios por área | `202611 AR27 Directorios por área.pdf` |
-| Organigrama | `202611 AR27 Organigrama.pdf` |
-| Directorio de departamentos | `202611 AR27 Directorio de departamentos.pdf` y `.xlsx` |
-| Registro de cambios | `202611 AR27 Registro de cambios.csv` |
-| Respaldo de un evento | `202611 AR27 Respaldo - Nombre del evento.json` |
-| Respaldo de todos los eventos | `202611 Respaldo - todos los eventos.json` (sin código, porque abarca varios eventos) |
+| **Administrador del evento** (uno por evento) | Todo dentro del evento: datos de la asamblea, directorio (alta, importación y baja), presidente, jefes de área, cualquier departamento, cartas de todas las áreas, invitar personas y gestionar el equipo. |
+| **Editor de área** (los otros 5) | Asigna solo en los **departamentos de su área**; activa o desactiva los departamentos de su área; marca «sin participación» a personas libres o de su área; ve y marca solo las **cartas de su área**. Ve el directorio completo, las asignaciones, el organigrama, los directorios y el registro de todo el evento. |
+| **Administrador general** | Ve todos los eventos (solo lectura, salvo en los que también es miembro) y es el único que puede **eliminarlos**. Da permiso de crear eventos a quien será administrador de evento. |
+
+No hay lectores: quien no pertenece a un evento no ve nada de él.
+
+### Cuenta y acceso
+
+1. Abre la pestaña **Cuenta** → *Crear cuenta* (nombre, correo y contraseña). Si se pide, confirma el correo con el enlace que llega (revisa también *spam*; ábrelo desde el mismo dispositivo).
+2. Puedes entrar con contraseña o con un **enlace por correo**. *Olvidé mi contraseña* envía un correo para cambiarla.
+3. Con sesión iniciada, el selector de eventos agrupa los eventos **En la nube** y **En este dispositivo**; junto al selector aparece tu rol.
+
+### Crear un evento y armar el equipo
+
+1. El administrador general marca a una cuenta como *Puede crear eventos* (Cuenta → Administración general).
+2. Esa persona va a **Cuenta → Crear evento en la nube**, escribe el nombre y elige **su área**. Puede marcar *Copiar a la nube los datos del evento local abierto* para subir un evento que ya tenía (directorio, asignaciones, cartas y encabezado).
+3. En la pestaña **Equipo** elige el área, pulsa **Generar enlace** y envíalo por WhatsApp. El enlace sirve una vez y vence en 7 días; quien lo abre crea su cuenta o inicia sesión y queda unido como editor de esa área. Si un área ya tiene 2 personas, no se puede invitar a más.
+4. En *Equipo* también puedes quitar miembros, **pasar el cargo de administrador** a otro miembro y gestionar el acceso a cartas (abajo).
+
+### Trabajar en equipo
+
+- Los cambios se guardan solos y llegan en tiempo real a los demás dispositivos. Si dos personas intentan asignar a la misma persona a la vez, la segunda recibe el aviso *«Esa persona ya tiene otra asignación»* y su pantalla se actualiza.
+- Los controles que tu rol no puede usar aparecen desactivados u ocultos; la base de datos además los rechaza.
+- **Registro de cambios:** lo escribe el servidor con el nombre real de cada cuenta (cámbialo en *Cuenta → Tu nombre*). Las importaciones y los cambios de cartas masivos generan una sola línea.
+- Quien cambia o quita a la persona de un puesto reinicia el estado de su carta.
+
+### Cartas de otras áreas
+
+Un editor ve solo las cartas de su área. Si necesita ver las demás (solo lectura), en *Cartas* pulsa **Solicitar ver las demás áreas**. El administrador del evento ve una insignia en *Equipo* y **aprueba o deniega**; al aprobar aparece el selector de área en las cartas del editor. El permiso es por persona, se puede revocar en cualquier momento y se conserva si cambia el administrador. Las cartas en PDF se generan en tu dispositivo; lo que se restringe es el seguimiento de estados y las filas visibles.
+
+### Qué conviene saber
+
+- Para abrir o guardar en la nube se necesita internet. Sin conexión puedes seguir con los eventos «En este dispositivo».
+- La imagen de encabezado de las cartas la sube el administrador; los demás la ven al abrir el evento o recargar.
+- *Exportar este evento* también funciona con un evento de la nube (respaldo en JSON).
+- Quitar a una persona del evento no borra sus asignaciones. Para dejar el equipo, el administrador debe pasar antes el cargo.
 
 ## Respaldos
 
@@ -157,11 +187,18 @@ Todas las descargas usan el mismo formato: `AAAAMM CÓDIGO Nombre.extensión`. E
 
 ## Privacidad
 
-- La aplicación no envía datos a ningún servidor; todo se procesa en el dispositivo.
+- **En este dispositivo** la aplicación no envía datos a ningún servidor; todo se procesa en el dispositivo.
+- **En la nube** el directorio, las asignaciones, el registro y los correos de las cuentas se guardan en el proyecto de Supabase del mantenedor. Solo los ven los miembros del evento y el administrador general; el directorio completo (con teléfonos y correos) es visible para todo el equipo del evento.
 - El directorio contiene datos personales. **No subas al repositorio** el CSV o PDF del directorio, los respaldos ni las cartas generadas.
 - La plantilla `plantilla/carta.pdf` debe tener los campos vacíos.
 
 ## Preguntas frecuentes
+
+**No me llega el correo de confirmación o de acceso.** Revisa *spam*. Si aparece «demasiados correos», espera unos minutos. Puedes entrar con contraseña una vez confirmada tu cuenta.
+
+**Me salió «No se guardó el cambio».** Alguien más cambió lo mismo a la vez o tu rol no permite ese cambio; la pantalla se actualiza con lo que hay en el servidor. Si no había conexión, vuelve a intentarlo cuando la recuperes.
+
+**Abrí un enlace de invitación y no pasó nada.** Inicia sesión o crea tu cuenta en la pestaña *Cuenta*: al terminar quedas unido al evento. Si dice que caducó o ya se usó, pide otro al administrador.
 
 **¿Puedo usarla sin internet?** Sí, después de abrirla una vez con conexión. Cargar la plantilla desde una dirección externa sí requiere internet; si no hay, se usa la última copia guardada.
 
