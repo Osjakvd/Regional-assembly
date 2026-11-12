@@ -2,9 +2,10 @@
 
 Aplicación web (PWA) para organizar una asamblea regional: directorio de personas, asignación por áreas y departamentos, organigrama, directorios imprimibles y cartas de invitación en PDF.
 
-Funciona en el navegador, se puede instalar en el celular o la computadora y **trabaja sin internet** después de la primera visita. No necesita servidor: los datos se guardan en el propio dispositivo.
+Funciona en el navegador, se puede instalar en el celular o la computadora y **trabaja sin internet** después de la primera visita. Tiene dos formas de trabajo:
 
-> Los datos **no se sincronizan** entre dispositivos. Para pasarlos de uno a otro se usan los respaldos (ver [Respaldos](#respaldos)). Una versión colaborativa está en planeación.
+- **En este dispositivo** (sin cuenta): los datos se guardan en el propio dispositivo y no se sincronizan. Para pasarlos de uno a otro se usan los respaldos (ver [Respaldos](#respaldos)).
+- **En la nube** (con cuenta): varias personas de un equipo trabajan en el mismo evento y ven los cambios de los demás al instante (ver [Eventos en la nube](#eventos-en-la-nube-colaborativo)).
 
 ---
 
