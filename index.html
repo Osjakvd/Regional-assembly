@@ -62,7 +62,7 @@ td,th{border-bottom:1px solid var(--bd);padding:6px 9px;text-align:left;vertical
 const D=(id,n,o={})=>({id,n,...o});
 const AREAS=[
 {id:'AC',h:'Coordinador del Comité de Asamblea',deps:[D('acom','Acomodadores'),D('cont','Contabilidad'),D('est','Estacionamiento'),D('pa','Primeros Auxilios'),D('seg','Seguridad',{co:1})]},
-{id:'AP',h:'Superintendente del programa',deps:[D('av','Audio y Video',{av:1}),D('bau','Bautismo'),D('it','Interpretación táctil (solo lengua de señas)',{opt:1})]},
+{id:'AP',h:'Superintendente del programa',deps:[D('av','Audio y Video',{av:1}),D('tinf','Tecnología informática y técnicos',{opt:1,en:'av',ti:1}),D('bau','Bautismo'),D('it','Interpretación táctil (solo lengua de señas)',{opt:1})]},
 {id:'AA',h:'Superintendente de Alojamiento',deps:[D('alo','Alojamiento'),D('isv','Información y Servicio Voluntario'),D('ins','Instalación',{opt:1}),D('lim','Limpieza'),D('ogg','Objetos Perdidos y Guardarropa'),D('tm','Transporte y Materiales',{opt:1}),D('agua','Agua potable')]}];
 const DEF={asm:{nombre:'Felices para siempre',tit2:'PACHUCA HGO. #01 | 22/05/26 - 24/05/26',recinto:'Auditorio Gota de Plata de Pachuca de Soto, Hgo.',ciudad:'Pachuca Hidalgo',fechas:'22-24 de mayo 2026',fcarta:''},people:[],as:{},pres:{},log:[],cs:{}};
 let S=JSON.parse(JSON.stringify(DEF)),T='asm',AR='AC',TPL=null,DL=null;
@@ -72,8 +72,15 @@ else{try{const j=localStorage.getItem('asamblea-e-'+EV.cur);if(j)S=Object.assign
 const save=()=>{if(CL.cur){cloudSave();return}try{localStorage.setItem('asamblea-ev',JSON.stringify(EV));localStorage.setItem('asamblea-e-'+EV.cur,JSON.stringify(S))}catch(e){}};
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const P=id=>S.people.find(p=>p.id==id),uid=()=>(window.crypto&&crypto.randomUUID)?crypto.randomUUID():'x'+Date.now().toString(36)+Math.random().toString(36).slice(2,9);
-const pres=d=>S.pres[d.id]!==undefined?S.pres[d.id]:!d.opt;
-const slots=d=>[d.co?'Coordinador':'Superintendente',...(d.av?['Auxiliar Audio','Auxiliar Video','Auxiliar Plataforma']:['Auxiliar','Auxiliar','Auxiliar'])];
+const ALLD=()=>AREAS.flatMap(a=>a.deps);
+const pres=d=>{if(d.en){const p=ALLD().find(x=>x.id==d.en);if(p&&!pres(p))return false}return S.pres[d.id]!==undefined?S.pres[d.id]:!d.opt};
+/* Un departamento con `en` es un bloque que se muestra DENTRO del departamento padre (Asignación, organigrama, directorios y cartas); solo Dir. dptos. lo muestra como fila propia. */
+const subsOf=d=>d.en?[]:ALLD().filter(x=>x.en==d.id&&pres(x));
+const pdeps=a=>a.deps.filter(d=>!d.en&&pres(d));
+const gslots=d=>[d,...subsOf(d)].flatMap(x=>slots(x).map((l,i)=>({l,k:x.id+':'+i,d:x,i})));
+const tlab=(x,i,l)=>x.ti?(i==0?'Sup. Tec. informática:':'Técnico A/V:'):(i==0?(x.co?'Coord.':'Sup.'):(x.av?l.replace('Auxiliar','Aux.')+':':'Aux.'));
+const tiName=()=>{const s=!!S.as['tinf:0'],q=[1,2,3].some(i=>S.as['tinf:'+i]);return s&&!q?'Tecnología informática':q&&!s?'Técnicos de Audio y Video':'Tecnología informática / Técnicos de Audio y Video'};
+const slots=d=>d.ti?['Superintendente de Tecnología informática','Técnico de Audio y Video','Técnico de Audio y Video','Técnico de Audio y Video']:[d.co?'Coordinador':'Superintendente',...(d.av?['Auxiliar Audio','Auxiliar Video','Auxiliar Plataforma']:['Auxiliar','Auxiliar','Auxiliar'])];
 const used=()=>new Set(Object.entries(S.as).filter(([k])=>{const i=k.split(':')[0];const d=AREAS.flatMap(a=>a.deps).find(x=>x.id==i);return !d||pres(d)}).map(e=>e[1]));
 const nm=k=>{const p=P(S.as[k]);return p?esc(p.nombre):'<span class="mu">—</span>'};
 (window.claude?window.claude.use('downloads'):Promise.resolve(null)).then(d=>{DL=d;if(T=='cartas'||T=='asm')render()}).catch(()=>{});
@@ -100,7 +107,7 @@ let FL='all';
 const live=k=>{const i=k.split(':')[0];const d=AREAS.flatMap(a=>a.deps).find(x=>x.id==i);return !d||pres(d)};
 const keysOf=id=>Object.keys(S.as).filter(k=>S.as[k]==id&&live(k));
 const isDep=k=>!/^(A[CPA]:|PR$)/.test(k);
-function kl(k){if(k=='PR')return'Presidente de la asamblea';const a=AREAS.find(x=>k.startsWith(x.id+':'));if(a)return k.endsWith(':h')?a.h:'Auxiliar de '+a.h;const d=AREAS.flatMap(x=>x.deps).find(x=>x.id==k.split(':')[0]);return d?slots(d)[+k.split(':')[1]]+' · '+d.n:'—'}
+function kl(k){if(k=='PR')return'Presidente de la asamblea';const a=AREAS.find(x=>k.startsWith(x.id+':'));if(a)return k.endsWith(':h')?a.h:'Auxiliar de '+a.h;const d=AREAS.flatMap(x=>x.deps).find(x=>x.id==k.split(':')[0]);return d?slots(d)[+k.split(':')[1]]+(d.ti?'':' · '+d.n):'—'}
 function match(p,f){if(f=='all')return true;if(f=='no')return !!p.no;if(p.no)return false;const ks=keysOf(p.id);if(f=='free')return !ks.length;if(f=='asg')return ks.length>0;const [t,v]=f.split(':');
 return ks.some(k=>{const i=k.split(':')[0],n=k.split(':')[1];if(t=='area'){const a=AREAS.find(x=>x.id==v);return k.startsWith(v+':')||a.deps.some(d=>d.id==i)}
 if(t=='dep')return i==v;if(t=='role'){if(v=='pres')return k=='PR';if(v=='jefe')return/^A[CPA]:h$/.test(k);if(v=='axa')return/^A[CPA]:x$/.test(k);if(v=='sup')return isDep(k)&&n=='0';return isDep(k)&&+n>0}return false})}
@@ -121,13 +128,15 @@ const seen=new Set(S.people.map(p=>(p.correo||p.nombre).toLowerCase()));let n=0;
 /* Asignación */
 function selOld(k){const u=used(),cur=S.as[k];return `<select onchange="setA('${k}',this.value)"><option value="">— sin asignar —</option>${S.people.filter(p=>p.id==cur||!u.has(p.id)).sort((a,b)=>a.nombre.localeCompare(b.nombre)).map(p=>`<option value="${p.id}"${p.id==cur?' selected':''}>${esc(p.nombre)}${p.cong?' · '+esc(p.cong):''}</option>`).join('')}</select>`}
 function setA(k,v){const pr=S.as[k];if(v&&pr!=v&&used().has(v)){alert('Esa persona ya tiene otra asignación.');render();return}if(pr&&pr!=v){const q=P(pr);lg('Quitó a '+(q?q.nombre:'—')+' de '+kl(k))}if(v){if(pr!=v)lg('Asignó a '+P(v).nombre+': '+kl(k));S.as[k]=v}else delete S.as[k];save();render()}
+function asgBody(d){return slots(d).map((l,i)=>`<div class="mu">${l}${i==3&&!d.av?' (opcional)':''}</div>${sel(d.id+':'+i)}`).join('')}
+function asgCard(d){const sub=ALLD().filter(x=>x.en==d.id);return `<div class="cd"><label><input type="checkbox" ${pres(d)?'checked':''} ${canDept(d.id)?'':'disabled'} onchange="setPres('${d.id}',this.checked)"> <b>${d.n}</b></label>${pres(d)?asgBody(d)+sub.map(s=>`<div style="margin-top:12px;padding-top:8px;border-top:1px dashed var(--bg3)"><label><input type="checkbox" ${pres(s)?'checked':''} ${canDept(s.id)?'':'disabled'} onchange="setPres('${s.id}',this.checked)"> <b>${s.n}</b> <span class="mu">(opcional)</span></label>${pres(s)?asgBody(s):''}</div>`).join(''):'<div class="mu">No presente en esta asamblea</div>'}</div>`}
 function vAsg(){const a=AREAS.find(x=>x.id==AR);
 return `<div class="r np">${AREAS.map(x=>`<button class="${x.id==AR?'on':''}" onclick="AR='${x.id}';render()">${x.h}</button>`).join('')}</div>
 <p class="mu">Cada persona solo puede tener una asignación; el selector muestra únicamente a quienes están libres.</p>${cloudAsgHint()}
 <div class="cd"><b>${a.h}</b>${sel(a.id+':h')}<b>Auxiliar</b>${sel(a.id+':x')}</div>
-${a.deps.map(d=>`<div class="cd"><label><input type="checkbox" ${pres(d)?'checked':''} ${canDept(d.id)?'':'disabled'} onchange="setPres('${d.id}',this.checked)"> <b>${d.n}</b></label>${pres(d)?slots(d).map((l,i)=>`<div class="mu">${l}${i==3&&!d.av?' (opcional)':''}</div>${sel(d.id+':'+i)}`).join(''):'<div class="mu">No presente en esta asamblea</div>'}</div>`).join('')}`}
+${a.deps.filter(d=>!d.en).map(asgCard).join('')}`}
 /* Organigrama */
-function lines(d){return slots(d).map((l,i)=>{if(!S.as[d.id+':'+i])return'';const t=i==0?(d.co?'Coord.':'Sup.'):(d.av?l.replace('Auxiliar','Aux.')+':':'Aux.');return `<div>${t} ${nm(d.id+':'+i)}</div>`}).join('')}
+function lines(d){return gslots(d).map(s=>{if(!S.as[s.k])return'';return `<div>${tlab(s.d,s.i,s.l)} ${nm(s.k)}</div>`}).join('')}
 /* Directorios */
 /* Cartas */
 let CF='all',CS='all';
@@ -135,7 +144,7 @@ const CSL={p:'Pendiente',e:'Enviada',a:'Aceptó',d:'Declinó'};
 const USR=()=>lsg('asamblea-user')||'';
 function lg(x){if(CL.cur)return;S.log=S.log||[];S.log.push({t:Date.now(),u:USR(),x});if(S.log.length>3000)S.log.splice(0,500)}
 const csOf=r=>{const c=(S.cs||{})[r.k];return c&&c.p==r.p.id?c.e:'p'};
-function recips(){const o=[];AREAS.forEach(a=>{const sup=P(S.as[a.id+':h']);a.deps.filter(pres).forEach(d=>slots(d).forEach((l,i)=>{const p=P(S.as[d.id+':'+i]);if(!p)return;o.push({p,a,d,i,sup,k:d.id+':'+i,directo:i?P(S.as[d.id+':0']):null,puesto:i==0?`${l} de ${d.n.replace(/\s*\(.*?\)/g,'')}`:(d.av?l:`Auxiliar de ${d.n.replace(/\s*\(.*?\)/g,'')}`)})}))});return cloudRecipsFilter(o)}
+function recips(){const o=[];AREAS.forEach(a=>{const sup=P(S.as[a.id+':h']);pdeps(a).forEach(D0=>gslots(D0).forEach(({l,k,d,i})=>{const p=P(S.as[k]);if(!p)return;o.push({p,a,d,i,sup,k,directo:d.ti?P(S.as[d.en+':0']):i?P(S.as[d.id+':0']):null,puesto:d.ti?l:i==0?`${l} de ${d.n.replace(/\s*\(.*?\)/g,'')}`:(d.av?l:`Auxiliar de ${d.n.replace(/\s*\(.*?\)/g,'')}`)})}))});return cloudRecipsFilter(o)}
 function crs(){return recips().filter(r=>(CF=='all'||r.a.id==CF)&&(CS=='all'||csOf(r)==CS))}
 function vCartas(){const A=recips(),R=crs(),n=e=>A.filter(r=>csOf(r)==e).length;
 return `<h2>Cartas de invitación (${A.length})</h2><p class="mu">${n('p')} pendientes · ${n('e')} enviadas · ${n('a')} aceptaron · ${n('d')} declinaron</p>
@@ -152,7 +161,7 @@ function expCS(){sv(pfn('Estado de cartas','csv'),'\uFEFF'+['Nombre,Asignación,
 function vLog(){return `<h2>Registro de cambios (${(S.log||[]).length})</h2><p class="mu">Se guarda por evento y se incluye en sus respaldos.</p><div class="r np"><input id="lq" placeholder="Buscar en el registro…" oninput="lgb()" style="flex:1;min-width:200px"><button onclick="expLog()">Exportar CSV</button></div><div class="w"><table><thead><tr><th>Fecha</th><th>Quién</th><th>Cambio</th></tr></thead><tbody id="lb"></tbody></table></div>`}
 function lgb(){const q=nz(document.getElementById('lq')?.value||'');document.getElementById('lb').innerHTML=(S.log||[]).slice().reverse().filter(e=>!q||nz(e.x+' '+e.u).includes(q)).slice(0,300).map(e=>`<tr><td>${new Date(e.t).toLocaleString('es-MX')}</td><td>${esc(e.u||'—')}</td><td>${esc(e.x)}</td></tr>`).join('')}
 function expLog(){sv(pfn('Registro de cambios','csv'),'\uFEFF'+['Fecha,Quién,Cambio',...(S.log||[]).map(e=>[new Date(e.t).toLocaleString('es-MX'),e.u||'',e.x].map(qc).join(','))].join('\n'))}
-function setPres(id,v){S.pres[id]=v;const d=AREAS.flatMap(a=>a.deps).find(x=>x.id==id);lg((v?'Marcó presente: ':'Marcó no presente: ')+d.n);save();render()}
+function setPres(id,v){S.pres[id]=v;if(!v)ALLD().filter(x=>x.en==id&&S.pres[x.id]).forEach(x=>{S.pres[x.id]=false});const d=AREAS.flatMap(a=>a.deps).find(x=>x.id==id);lg((v?'Marcó presente: ':'Marcó no presente: ')+d.n);save();render()}
 function doNo(id,v){const p=P(id);if(!p)return;if(v)keysOf(id).forEach(k=>{lg('Quitó a '+p.nombre+' de '+kl(k));delete S.as[k]});p.no=v;lg((v?'Marcó sin participación a ':'Quitó la marca de sin participación a ')+p.nombre)}
 function setNo(id,v){const ks=keysOf(id);if(v&&ks.length&&!confirm('Esta persona tiene asignación ('+ks.map(kl).join(', ')+'). Se quitará. ¿Continuar?')){render();return}doNo(id,v);save();render()}
 const nz=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -162,7 +171,7 @@ function selOld(k){return `<input placeholder="Buscar por nombre, apellido o con
 const PI=k=>{const p=P(S.as[k]);return p?{n:p.nombre,t:p.tel||'',c:p.cong||''}:null};
 function G(){const A=S.asm,ar=[['Coordinador del Comité','Auxiliar del coordinador del Comité'],['Superintendente del programa','Auxiliar del superintendente del programa'],['Superintendente de Alojamiento','Auxiliar del superintendente de Alojamiento']];
 return {t:'DIRECTORIO DE DEPARTAMENTOS DE LA ASAMBLEA REGIONAL',l:'"'+A.nombre+'"',s:'CEDE: '+A.ciudad+', '+A.recinto+' '+A.fechas,hd:AREAS.map((a,i)=>({l:ar[i][0],p:PI(a.id+':h')})),ax:AREAS.map((a,i)=>({l:ar[i][1],p:PI(a.id+':x')})),pr:PI('PR'),
-rows:AREAS.flatMap((a,ai)=>a.deps.filter(pres).map(d=>({ai,n:d.n+(d.av?' (auxiliares: Audio, Video y Plataforma)':''),c:[0,1,2,3].map(i=>PI(d.id+':'+i))})))}}
+rows:AREAS.flatMap((a,ai)=>a.deps.filter(pres).map(d=>({ai,n:d.ti?tiName():d.n+(d.av?' (auxiliares: Audio, Video y Plataforma)':''),c:[0,1,2,3].map(i=>PI(d.id+':'+i))})))}}
 const PC=['#f4cccc','#d0e0e3','#fce5cd'];
 function vDpt(){const g=G(),c=p=>p?`<b>${esc(p.n)}</b><br>Cel: ${esc(p.t)}<br>${esc(p.c)}`:'<span class="mu">—</span>';
 return `<div class="r np"><button class="on" onclick="gPdf()">Descargar PDF</button><button onclick="gXls()">Descargar Excel</button></div><p class="mu">Vista previa. Los departamentos no presentes no se incluyen.</p>
@@ -282,12 +291,12 @@ const flLab=f=>{const m={all:'Todos',free:'Libres (sin asignación)',asg:'Asigna
 async function pdfDirG(){try{const qt=(document.getElementById('q')?.value||'').trim(),q=nz(qt).split(/\s+/).filter(Boolean);
 const L=S.people.filter(p=>match(p,FL)&&q.every(w=>nz(p.nombre+' '+p.cong+' '+p.correo).includes(w))).sort((a,b)=>a.nombre.localeCompare(b.nombre));
 await sv(pfn('Directorio general'),await pdfTable({land:1,title:'DIRECTORIO GENERAL',sub:'Filtro: '+flLab(FL)+(qt?' · Búsqueda: "'+qt+'"':'')+' · '+L.length+(L.length==1?' persona':' personas'),cols:[{h:'Nombre',w:.22},{h:'Congregación',w:.22},{h:'Teléfono',w:.12},{h:'Correo',w:.21},{h:'Asignación',w:.23}],blocks:[{rows:L.map(p=>({cells:[p.nombre,p.cong,p.tel,p.correo,where(p)],muted:!!p.no}))}]}))}catch(e){alert('Error al generar el PDF: '+e.message)}}
-async function pdfDds(){try{const blocks=AREAS.map((a,ai)=>{const rows=[],add=(l,k)=>{const p=P(S.as[k]);if(p)rows.push({cells:[l,p.nombre,p.cong,p.tel,p.correo]})};add(a.h,a.id+':h');add('Auxiliar',a.id+':x');a.deps.filter(pres).forEach(d=>{rows.push({dept:d.n});slots(d).forEach((l,i)=>add(l,d.id+':'+i))});return {band:a.h,strong:AST[ai],tint:PC[ai],rows}});
+async function pdfDds(){try{const blocks=AREAS.map((a,ai)=>{const rows=[],add=(l,k)=>{const p=P(S.as[k]);if(p)rows.push({cells:[l,p.nombre,p.cong,p.tel,p.correo]})};add(a.h,a.id+':h');add('Auxiliar',a.id+':x');pdeps(a).forEach(d=>{rows.push({dept:d.n});gslots(d).forEach(s=>add(s.l,s.k))});return {band:a.h,strong:AST[ai],tint:PC[ai],rows}});
 await sv(pfn('Directorios por área'),await pdfTable({land:0,title:'DIRECTORIO POR ÁREAS',cols:[{h:'Asignación',w:.2},{h:'Nombre',w:.24},{h:'Congregación',w:.2},{h:'Teléfono',w:.12},{h:'Correo',w:.24}],blocks}))}catch(e){alert('Error al generar el PDF: '+e.message)}}
 function orgBoxes(sz,cw,F,B){const lh=sz*1.22,pd=4,gap=5,cols=[];
 AREAS.forEach((a,ai)=>{const bx=[],hd=(label,k)=>{const tl=wrapT(label,cw-2*pd,sz,B),nl=wrapT((P(S.as[k])||{}).nombre||'—',cw-2*pd,sz,F);return {t:'head',ai,tl,nl,h:(tl.length+nl.length)*lh+2*pd}};
 bx.push(hd(a.h,a.id+':h'));bx.push(hd('Auxiliar',a.id+':x'));
-a.deps.filter(pres).forEach(d=>{const tl=wrapT(d.n,cw-2*pd,sz,B),ls=[];slots(d).forEach((l,i)=>{const p=P(S.as[d.id+':'+i]);if(!p)return;const t=i==0?(d.co?'Coord.':'Sup.'):(d.av?l.replace('Auxiliar','Aux.')+':':'Aux.');wrapT(t+' '+p.nombre,cw-2*pd,sz,F).forEach((x,j)=>ls.push(j?'   '+x:x))});bx.push({t:'dep',ai,tl,ls,h:tl.length*lh+2*pd+(ls.length?ls.length*lh+pd:0)})});cols.push(bx)});
+pdeps(a).forEach(d=>{const tl=wrapT(d.n,cw-2*pd,sz,B),ls=[];gslots(d).forEach(s=>{const p=P(S.as[s.k]);if(!p)return;const t=tlab(s.d,s.i,s.l);wrapT(t+' '+p.nombre,cw-2*pd,sz,F).forEach((x,j)=>ls.push(j?'   '+x:x))});bx.push({t:'dep',ai,tl,ls,h:tl.length*lh+2*pd+(ls.length?ls.length*lh+pd:0)})});cols.push(bx)});
 return {cols,lh,pd,gap,max:Math.max(...cols.map(b=>b.reduce((s,x)=>s+x.h,0)+gap*(b.length-1)))}}
 async function pdfOrg(){try{const mode=S.asm.orgp||'auto',M=36,gp=12;
 const attempt=async(H,min)=>{const c=await pdfNew(612,H),pg=c.doc.addPage([612,H]),y0=await pdfHead(c,pg,'ORGANIGRAMA GENERAL',M),cw=(612-2*M-2*gp)/3,av=H-y0-M-14;for(let sz=9.5;sz>=min;sz-=.25){const L=orgBoxes(sz,cw,c.F,c.B);if(L.max<=av)return {c,pg,y0,cw,L,sz}}return null};
@@ -298,9 +307,9 @@ L.cols.forEach((bx,ci)=>{const x=M+ci*(cw+gp);let y=y0;bx.forEach(b=>{if(b.t=='h
 else{rc(x,y,cw,b.h,null,1.2);const sh=b.tl.length*L.lh+2*L.pd;rc(x,y,cw,sh,PC[b.ai],1.2);let t=y+L.pd;b.tl.forEach(l=>{tb(l,x+L.pd,t);t+=L.lh});t=y+sh;b.ls.forEach(l=>{tx(l,x+L.pd,t);t+=L.lh})}y+=b.h+L.gap})});
 pdfFoot(c,M);await sv(pfn('Organigrama'),await c.doc.save())}catch(e){alert('Error al generar el PDF: '+e.message)}}
 function row(l,k){const p=P(S.as[k]);return p?`<tr><td><b>${l}</b></td><td>${esc(p.nombre)}</td><td>${esc(p.cong)}</td><td>${esc(p.tel)}</td><td>${esc(p.correo)}</td></tr>`:''}
-function vDds(){return `<div class="np r"><button class="on" onclick="pdfDds()">Descargar PDF</button><button onclick="window.print()">Imprimir</button>${imgChk()}</div>${hdr()}${AREAS.map((a,ai)=>`<h2 class="ah" style="background:${AST[ai]}">${a.h}</h2><div class="w"><table class="tf"><thead><tr><th>Asignación</th><th>Nombre</th><th>Congregación</th><th>Teléfono</th><th>Correo</th></tr></thead><tbody>${row(a.h,a.id+':h')}${row('Auxiliar',a.id+':x')}${a.deps.filter(pres).map(d=>`<tr><th colspan="5" class="dp" style="background:${PC[ai]}">${d.n}</th></tr>`+slots(d).map((l,i)=>row(l,d.id+':'+i)).join('')).join('')}</tbody></table></div>`).join('')}`}
+function vDds(){return `<div class="np r"><button class="on" onclick="pdfDds()">Descargar PDF</button><button onclick="window.print()">Imprimir</button>${imgChk()}</div>${hdr()}${AREAS.map((a,ai)=>`<h2 class="ah" style="background:${AST[ai]}">${a.h}</h2><div class="w"><table class="tf"><thead><tr><th>Asignación</th><th>Nombre</th><th>Congregación</th><th>Teléfono</th><th>Correo</th></tr></thead><tbody>${row(a.h,a.id+':h')}${row('Auxiliar',a.id+':x')}${pdeps(a).map(d=>`<tr><th colspan="5" class="dp" style="background:${PC[ai]}">${d.n}</th></tr>`+gslots(d).map(s=>row(s.l,s.k)).join('')).join('')}</tbody></table></div>`).join('')}`}
 function vOrg(){const o=S.asm.orgp||'auto',op=(v,t)=>`<option value="${v}"${v==o?' selected':''}>${t}</option>`;
-return `<div class="np r"><button class="on" onclick="pdfOrg()">Descargar PDF</button><select onchange="S.asm.orgp=this.value;save()">${op('auto','Hoja: automática')}${op('carta','Hoja: carta')}${op('oficio','Hoja: oficio (legal)')}</select><button onclick="window.print()">Imprimir</button>${imgChk()}</div>${hdr()}<div class="g3">${AREAS.map(a=>`<div><div class="bx t"><b>${a.h}</b>${nm(a.id+':h')}</div><div class="bx t"><b>Auxiliar</b>${nm(a.id+':x')}</div>${a.deps.filter(pres).map(d=>`<div class="bx"><b>${d.n}</b>${lines(d)}</div>`).join('')}</div>`).join('')}</div>`}
+return `<div class="np r"><button class="on" onclick="pdfOrg()">Descargar PDF</button><select onchange="S.asm.orgp=this.value;save()">${op('auto','Hoja: automática')}${op('carta','Hoja: carta')}${op('oficio','Hoja: oficio (legal)')}</select><button onclick="window.print()">Imprimir</button>${imgChk()}</div>${hdr()}<div class="g3">${AREAS.map(a=>`<div><div class="bx t"><b>${a.h}</b>${nm(a.id+':h')}</div><div class="bx t"><b>Auxiliar</b>${nm(a.id+':x')}</div>${pdeps(a).map(d=>`<div class="bx"><b>${d.n}</b>${lines(d)}</div>`).join('')}</div>`).join('')}</div>`}
 /* Importar PDF */
 function cards(it){const PV=/^(Anciano|Siervo ministerial|Precursor( regular| auxiliar)?|Publicador( bautizado| no bautizado)?)$/i;
 const LN=a=>{const G=[];a.slice().sort((p,q)=>p.t-q.t).forEach(x=>{let g=G.find(g=>Math.abs(g.t-x.t)<2.5);if(!g)G.push(g={t:x.t,c:[]});g.c.push(x)});return G.map(g=>g.c.sort((p,q)=>p.x-q.x).reduce((s,x,i,r)=>s+(i&&x.x-(r[i-1].x+r[i-1].w)>=1.5?' ':'')+x.s,''))};

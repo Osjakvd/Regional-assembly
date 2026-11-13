@@ -74,6 +74,7 @@ Cada evento (por ejemplo, cada asamblea) tiene su propio directorio, asignacione
   - Toca una sugerencia para asignar. Si ya hay alguien, aparece al inicio "Quitar asignación". Con teclado: flechas, Enter para elegir y Esc para cerrar.
   - La lista solo muestra personas libres: **una persona no puede tener dos asignaciones**. Si hay más de 40 coincidencias, se muestran las primeras y hay que seguir escribiendo.
 - Un departamento que se marca como no presente no cuenta como asignación.
+- **Tecnología informática y técnicos (opcional):** dentro del cuadro de *Audio y Video* hay un bloque con su propia casilla de *presente* (apagada por defecto) y 4 puestos: *Superintendente de Tecnología informática* y tres *Técnico de Audio y Video* (suelen ser 2; el tercero es opcional). Si en tu asamblea solo hay técnicos o solo Tecnología informática, deja vacíos los puestos que no uses. Al apagar *Audio y Video* también se apaga este bloque; al volver a encenderlo hay que activarlo de nuevo.
 
 ### Organigrama
 - **Descargar PDF:** organigrama con nombres completos en **una sola hoja**. El tamaño de letra se ajusta solo; el selector *Hoja* permite elegir **automática** (carta y, si no cabe con letra legible, oficio/legal), **carta** u **oficio (legal)**.
@@ -87,7 +88,7 @@ Cada evento (por ejemplo, cada asamblea) tiene su propio directorio, asignacione
 Si el evento tiene una imagen de encabezado cargada (ver Cartas), aparece la casilla *Usar la imagen de encabezado en el PDF* en el directorio general, el organigrama y los directorios por área. Viene apagada por defecto; al activarla, la imagen sustituye al encabezado escrito, como hoja membretada.
 
 ### Dir. dptos.
-Directorio de departamentos con el formato de una hoja: comité, presidente y tabla de departamentos con superintendente y Auxiliar A, B y C (nombre, celular y congregación completos). Se descarga en **PDF** (principal) y en **Excel**. No se incluyen los departamentos que no estén presentes.
+Directorio de departamentos con el formato de una hoja (el bloque de *Tecnología informática y técnicos* aparece como **una fila propia debajo de Audio y Video**, con el superintendente de Tecnología informática y los técnicos A, B y C en las mismas columnas; el nombre de la fila se adapta a lo que haya asignado): comité, presidente y tabla de departamentos con superintendente y Auxiliar A, B y C (nombre, celular y congregación completos). Se descarga en **PDF** (principal) y en **Excel**. No se incluyen los departamentos que no estén presentes.
 
 ### Registro
 Historial de cambios por evento: asignaciones y bajas, presencia de departamentos, altas y bajas del directorio, importaciones, marcas de sin participación y estado de cartas. Tiene buscador y se exporta a CSV.

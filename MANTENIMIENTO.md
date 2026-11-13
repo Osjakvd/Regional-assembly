@@ -68,7 +68,7 @@ La app es una página estática; la parte colaborativa usa un proyecto de **Supa
 
 ### Puesta en marcha (una sola vez)
 
-1. **Esquema:** en Supabase → *SQL Editor*, pega y ejecuta `supabase/01_esquema.sql` completo (si ya habías ejecutado una versión anterior, aplica los parches `03_…` y `04_…` o reinicia con `99_…`). Los detalles de roles, reglas y funciones están en `supabase/LEEME_SQL.md`.
+1. **Esquema:** en Supabase → *SQL Editor*, pega y ejecuta `supabase/01_esquema.sql` completo (si ya habías ejecutado una versión anterior, aplica los parches `03_…`, `04_…` y `05_…` o reinicia con `99_…`). Los detalles de roles, reglas y funciones están en `supabase/LEEME_SQL.md`.
 2. **Administrador general:** crea tu cuenta (en la app o en *Authentication → Users*) y ejecuta:
    `update public.profiles set is_superadmin = true, can_create_events = true where email = 'TU_CORREO';`
    Desde la pestaña *Cuenta* podrás dar permiso de crear eventos a otras cuentas.
@@ -84,7 +84,7 @@ La app es una página estática; la parte colaborativa usa un proyecto de **Supa
 - **Eliminar un evento:** solo el administrador general (*Cuenta → Administración general*).
 - **Cambiar el administrador de un evento:** *Equipo → Hacer administrador* (lo hace el administrador actual o el general).
 - **Respaldo de la base:** el plan gratuito no incluye respaldos descargables automáticos; exporta periódicamente cada evento con *Exportar este evento* y, si quieres, un volcado desde el panel de Supabase.
-- **Cambios de esquema:** se hacen con parches SQL que no borran datos (ver `supabase/`); después sube la versión de `sw.js` si también cambió la app.
+- **Cambios de esquema:** se hacen con parches SQL que no borran datos (ver `supabase/`); después sube la versión de `sw.js` si también cambió la app. **Importante:** si subes una app que usa un departamento nuevo (como `tinf`), aplica antes el parche SQL correspondiente; si no, la base rechazará esas asignaciones.
 
 ## Datos y privacidad
 
@@ -121,6 +121,7 @@ La app es una página estática; la parte colaborativa usa un proyecto de **Supa
 
 | Versión | Cambios |
 |---|---|
+| 2.1 | Bloque opcional **Tecnología informática y técnicos** dentro de Audio y Video (Asignación, organigrama, directorios y cartas lo agrupan en Audio y Video; Dir. dptos. lo muestra como fila propia). En la nube requiere el parche `supabase/05_parche_tecnologia_informatica.sql` |
 | 2.0 | **Versión colaborativa:** cuentas, eventos en la nube con equipo de 6 (2 por área), roles (administrador general, administrador de evento, editor de área), invitaciones por enlace, sincronización en tiempo real, solicitud y aprobación para ver cartas de otras áreas, copia de un evento local a la nube. Los eventos locales siguen funcionando igual |
 | 1.11 | El ZIP de cartas incluye en el nombre el área filtrada |
 | 1.10 | Todas las descargas usan el formato `AAAAMM CÓDIGO Nombre` |																	  
